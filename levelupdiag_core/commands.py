@@ -7,6 +7,7 @@ sequences and the normal execution path always uses ``shell=False``.
 from __future__ import annotations
 
 import os
+import re
 import shlex
 import shutil
 import subprocess
@@ -17,7 +18,14 @@ from pathlib import Path
 from .models import StepResult
 from .verdicts import FAIL, INFRA_ERROR, PASS
 
-_DEFAULT_TAIL_CHARS = 8000
+_DEFAULT_TAIL_CHARS = 131072
+_REPORT_DIRECTORY_NAME = "koa-ci-evidence"
+_REPORT_NAME_SUFFIX = "-gate-report.json"
+_REPORT_RE = re.compile(r"(?im)\breport=(?P<path>[^\r\n]+)")
+_MODULE_NOT_FOUND_RE = re.compile(
+    r"""ModuleNotFoundError:\s+No module named ['"](?P<name>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)['"]"""
+)
+_MAX_REFERENCED_REPORT_CHARS = 131072
 
 
 def find_executable(name: str) -> str | None:
@@ -74,6 +82,85 @@ def _tail(value: str, tail_chars: int) -> str:
     if tail_chars == 0:
         return ""
     return value[-tail_chars:]
+
+
+def missing_python_modules(output: str) -> list[str]:
+    """Return unique Python module names reported as missing in command output."""
+
+    return sorted({match.group("name") for match in _MODULE_NOT_FOUND_RE.finditer(output)})
+
+
+def append_referenced_reports(
+    output: str,
+    *,
+    cwd: str | Path | None = None,
+    max_report_chars: int = _MAX_REFERENCED_REPORT_CHARS,
+) -> str:
+    """Append readable local report files explicitly referenced as ``report=...``.
+
+    Public kOA-Linux gate scripts commonly emit a final ``report=<path>`` line
+    when a gate fails or is blocked. LevelUpDiag records only JSON gate reports
+    named ``*-gate-report.json`` below a ``koa-ci-evidence`` directory, keeping
+    ``output.log`` self-contained without following arbitrary file references.
+
+    The helper is opt-in: callers decide which trusted command outputs are
+    eligible for local report expansion.
+    """
+
+    if max_report_chars < 0:
+        raise ValueError("max_report_chars must be >= 0")
+    base = Path(cwd).expanduser().resolve() if cwd is not None else Path.cwd().resolve()
+    sections: list[str] = []
+    seen: set[Path] = set()
+
+    for match in _REPORT_RE.finditer(output):
+        raw = match.group("path").strip().strip('"').strip("'")
+        if not raw:
+            continue
+        candidate = Path(raw).expanduser()
+        if not candidate.is_absolute():
+            candidate = base / candidate
+        try:
+            path = candidate.resolve()
+        except OSError:
+            continue
+        parts = {part.casefold() for part in path.parts}
+        if (
+            path in seen
+            or _REPORT_DIRECTORY_NAME.casefold() not in parts
+            or not path.name.casefold().endswith(_REPORT_NAME_SUFFIX)
+            or not path.is_file()
+        ):
+            continue
+        seen.add(path)
+        try:
+            text = path.read_text(encoding="utf-8", errors="replace")
+        except OSError as exc:
+            sections.append(
+                f"[LevelUpDiag] Referenced report could not be read: {path}\n"
+                f"{type(exc).__name__}: {exc}"
+            )
+            continue
+
+        if max_report_chars and len(text) > max_report_chars:
+            half = max_report_chars // 2
+            omitted = len(text) - (half * 2)
+            text = (
+                text[:half]
+                + f"\n\n[LevelUpDiag] ... {omitted} report character(s) omitted ...\n\n"
+                + text[-half:]
+            )
+        elif max_report_chars == 0:
+            text = ""
+
+        sections.append(
+            f"[LevelUpDiag] Referenced report: {path}\n"
+            + (text.rstrip() or "[empty report]")
+        )
+
+    if not sections:
+        return output
+    return output.rstrip() + "\n\n" + "\n\n".join(sections) + "\n"
 
 
 def run_cmd(

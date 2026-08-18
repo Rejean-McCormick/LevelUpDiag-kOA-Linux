@@ -6,13 +6,13 @@ import os
 import shlex
 from datetime import datetime
 
-from levelupdiag_core.commands import run_cmd
+from levelupdiag_core.commands import append_referenced_reports, missing_python_modules, run_cmd
 from levelupdiag_core.config import AppConfig, load_config
 from levelupdiag_core.logs import run_directory, update_latest, write_output_log
 from levelupdiag_core.manifest import get_level
 from levelupdiag_core.models import Finding, LevelResult
 from levelupdiag_core.reports import write_level_result
-from levelupdiag_core.verdicts import SKIP, exit_code
+from levelupdiag_core.verdicts import BLOCKED, SKIP, exit_code
 
 LEVEL_ID = "N10"
 LEVEL_NAME = "System"
@@ -70,21 +70,48 @@ def run(config: AppConfig | None = None) -> LevelResult:
         name=LEVEL_NAME,
         env=cfg.env(),
     )
+    step.output_tail = append_referenced_reports(
+        step.output_tail,
+        cwd=cfg.target_root_path,
+    )
+    normalized_verdict = step.verdict
+    blocked_marker = "system: blocked" in step.output_tail.lower()
+    if step.verdict == "FAIL" and blocked_marker:
+        normalized_verdict = BLOCKED
+
     findings: list[Finding] = []
-    if step.verdict != "PASS":
+    if normalized_verdict != "PASS":
+        missing_modules = missing_python_modules(step.output_tail)
+        if normalized_verdict == BLOCKED:
+            message = "System validation reported BLOCKED."
+            recommendation = "Inspect the captured gate report to identify the unmet prerequisite."
+        elif missing_modules:
+            joined = ", ".join(missing_modules)
+            message = (
+                f"System validation could not import required Python module(s): {joined}."
+            )
+            recommendation = (
+                "Activate or install the kOA-Linux validation/test environment so these "
+                f"modules are importable: {joined}."
+            )
+        else:
+            message = step.error or f"System validation exited with code {step.exit_code}."
+            recommendation = "Inspect the captured command output and referenced gate report."
         findings.append(
             Finding(
                 id="n10.system.command-result",
-                severity=step.verdict,
-                message=step.error or f"System validation exited with code {step.exit_code}.",
+                severity=normalized_verdict,
+                message=message,
                 category="execution",
                 evidence=step.output_tail or None,
+                recommendation=recommendation,
+                data={"missing_python_modules": missing_modules} if missing_modules else {},
             )
         )
     return LevelResult(
         level=LEVEL_ID,
         name=LEVEL_NAME,
-        verdict=step.verdict,
+        verdict=normalized_verdict,
         findings=findings,
         started_at=step.started_at,
         ended_at=step.ended_at,

@@ -7,7 +7,7 @@ import os
 import shlex
 from pathlib import Path
 
-from levelupdiag_core.commands import run_cmd
+from levelupdiag_core.commands import append_referenced_reports, missing_python_modules, run_cmd
 from levelupdiag_core.config import AppConfig, load_config
 from levelupdiag_core.logs import run_directory, update_latest, write_output_log
 from levelupdiag_core.manifest import get_level
@@ -66,11 +66,24 @@ def _local_result(verdict: str, finding: Finding, started: datetime) -> LevelRes
 def _from_step(step: StepResult) -> LevelResult:
     findings: list[Finding] = []
     if step.verdict != "PASS":
-        message = (
-            f"Configured {_COMMAND_KEY} validation command failed."
-            if step.verdict == "FAIL"
-            else f"Configured {_COMMAND_KEY} validation command could not complete."
-        )
+        missing_modules = missing_python_modules(step.output_tail)
+        if missing_modules:
+            joined = ", ".join(missing_modules)
+            message = (
+                f"Configured {_COMMAND_KEY} validation could not import required Python "
+                f"module(s): {joined}."
+            )
+            recommendation = (
+                "Activate or install the kOA-Linux validation/test environment so these "
+                f"modules are importable: {joined}."
+            )
+        else:
+            message = (
+                f"Configured {_COMMAND_KEY} validation command failed."
+                if step.verdict == "FAIL"
+                else f"Configured {_COMMAND_KEY} validation command could not complete."
+            )
+            recommendation = "Inspect the configured public kOA-Linux command and its output."
         findings.append(
             Finding(
                 id=f"{LEVEL_ID.lower()}.{_COMMAND_KEY}.command",
@@ -78,9 +91,8 @@ def _from_step(step: StepResult) -> LevelResult:
                 message=message,
                 category="execution",
                 evidence=step.error or step.output_tail or None,
-                recommendation=(
-                    "Inspect the configured public kOA-Linux command and its output."
-                ),
+                recommendation=recommendation,
+                data={"missing_python_modules": missing_modules} if missing_modules else {},
             )
         )
     return LevelResult(
@@ -157,6 +169,10 @@ def run(config: AppConfig | None = None) -> LevelResult:
         timeout=level_info.timeout_seconds,
         name=f"{LEVEL_ID} {LEVEL_NAME}",
         env=cfg.env(),
+    )
+    step.output_tail = append_referenced_reports(
+        step.output_tail,
+        cwd=cfg.target_root_path,
     )
     if step.verdict not in {"PASS", "FAIL", INFRA_ERROR}:
         # This protects the frozen Level protocol if run_cmd evolves later.

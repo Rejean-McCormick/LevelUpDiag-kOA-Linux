@@ -6,7 +6,7 @@ import os
 import shlex
 from datetime import datetime
 
-from levelupdiag_core.commands import run_cmd
+from levelupdiag_core.commands import append_referenced_reports, missing_python_modules, run_cmd
 from levelupdiag_core.config import AppConfig, load_config
 from levelupdiag_core.logs import run_directory, update_latest, write_output_log
 from levelupdiag_core.manifest import get_level
@@ -70,15 +70,32 @@ def run(config: AppConfig | None = None) -> LevelResult:
         name=LEVEL_NAME,
         env=cfg.env(),
     )
+    step.output_tail = append_referenced_reports(
+        step.output_tail,
+        cwd=cfg.target_root_path,
+    )
     findings: list[Finding] = []
     if step.verdict != "PASS":
+        missing_modules = missing_python_modules(step.output_tail)
+        if missing_modules:
+            joined = ", ".join(missing_modules)
+            message = f"Security validation could not import required Python module(s): {joined}."
+            recommendation = (
+                "Activate or install the kOA-Linux validation/test environment so these "
+                f"modules are importable: {joined}."
+            )
+        else:
+            message = step.error or f"Security validation exited with code {step.exit_code}."
+            recommendation = "Inspect the captured security command output and referenced gate report."
         findings.append(
             Finding(
                 id="n08.security.command-result",
                 severity=step.verdict,
-                message=step.error or f"Security validation exited with code {step.exit_code}.",
+                message=message,
                 category="execution",
                 evidence=step.output_tail or None,
+                recommendation=recommendation,
+                data={"missing_python_modules": missing_modules} if missing_modules else {},
             )
         )
     return LevelResult(
