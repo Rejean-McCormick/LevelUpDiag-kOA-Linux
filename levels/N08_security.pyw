@@ -12,7 +12,7 @@ from levelupdiag_core.logs import run_directory, update_latest, write_output_log
 from levelupdiag_core.manifest import get_level
 from levelupdiag_core.models import Finding, LevelResult
 from levelupdiag_core.reports import write_level_result
-from levelupdiag_core.verdicts import SKIP, exit_code
+from levelupdiag_core.verdicts import BLOCKED, SKIP, exit_code
 
 LEVEL_ID = "N08"
 LEVEL_NAME = "Security"
@@ -74,10 +74,19 @@ def run(config: AppConfig | None = None) -> LevelResult:
         step.output_tail,
         cwd=cfg.target_root_path,
     )
+
+    normalized_verdict = step.verdict
+    blocked_marker = "security: blocked" in step.output_tail.lower()
+    if step.verdict == "FAIL" and blocked_marker:
+        normalized_verdict = BLOCKED
+
     findings: list[Finding] = []
-    if step.verdict != "PASS":
+    if normalized_verdict != "PASS":
         missing_modules = missing_python_modules(step.output_tail)
-        if missing_modules:
+        if normalized_verdict == BLOCKED:
+            message = "Security validation reported BLOCKED."
+            recommendation = "Inspect the captured gate report to identify the unmet prerequisite."
+        elif missing_modules:
             joined = ", ".join(missing_modules)
             message = f"Security validation could not import required Python module(s): {joined}."
             recommendation = (
@@ -87,10 +96,11 @@ def run(config: AppConfig | None = None) -> LevelResult:
         else:
             message = step.error or f"Security validation exited with code {step.exit_code}."
             recommendation = "Inspect the captured security command output and referenced gate report."
+
         findings.append(
             Finding(
                 id="n08.security.command-result",
-                severity=step.verdict,
+                severity=normalized_verdict,
                 message=message,
                 category="execution",
                 evidence=step.output_tail or None,
@@ -98,10 +108,11 @@ def run(config: AppConfig | None = None) -> LevelResult:
                 data={"missing_python_modules": missing_modules} if missing_modules else {},
             )
         )
+
     return LevelResult(
         level=LEVEL_ID,
         name=LEVEL_NAME,
-        verdict=step.verdict,
+        verdict=normalized_verdict,
         findings=findings,
         started_at=step.started_at,
         ended_at=step.ended_at,

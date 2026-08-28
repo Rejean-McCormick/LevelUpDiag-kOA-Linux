@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import tarfile
 import zipfile
 from datetime import datetime
 from pathlib import Path, PurePosixPath
@@ -82,6 +83,16 @@ def _scan_zip(target: Path) -> list[tuple[str, str]]:
     return matches
 
 
+def _scan_tar(target: Path) -> list[tuple[str, str]]:
+    matches: list[tuple[str, str]] = []
+    with tarfile.open(target, "r:*") as archive:
+        for member in archive:
+            signature = _matching_signature(member.name)
+            if signature:
+                matches.append((member.name, signature))
+    return matches
+
+
 def _failure_result(target: Path, matches: list[tuple[str, str]], started: datetime) -> LevelResult:
     ended = datetime.now().astimezone()
     findings = [
@@ -153,6 +164,8 @@ def run(config: AppConfig | None = None) -> LevelResult:
             matches = _scan_directory(target)
         elif target.is_file() and zipfile.is_zipfile(target):
             matches = _scan_zip(target)
+        elif target.is_file() and tarfile.is_tarfile(target):
+            matches = _scan_tar(target)
         elif target.is_file():
             return LevelResult(
                 level=LEVEL_ID,
@@ -162,10 +175,10 @@ def run(config: AppConfig | None = None) -> LevelResult:
                     Finding(
                         id="n11.delivery.unsupported-file",
                         severity=BLOCKED,
-                        message="Delivery target is a regular file but not a ZIP archive.",
+                        message="Delivery target is a regular file but not a supported ZIP or TAR archive.",
                         category="delivery",
                         path=str(target),
-                        recommendation="Provide a directory or ZIP archive for inspection.",
+                        recommendation="Provide a directory, ZIP archive, or TAR archive for inspection.",
                     )
                 ],
                 cwd=str(target),
@@ -179,14 +192,14 @@ def run(config: AppConfig | None = None) -> LevelResult:
                     Finding(
                         id="n11.delivery.unsupported-target",
                         severity=BLOCKED,
-                        message="Delivery target is neither a directory nor a supported ZIP archive.",
+                        message="Delivery target is neither a directory nor a supported ZIP or TAR archive.",
                         category="delivery",
                         path=str(target),
                     )
                 ],
                 cwd=str(target),
             )
-    except (OSError, zipfile.BadZipFile) as exc:
+    except (OSError, tarfile.TarError, zipfile.BadZipFile) as exc:
         ended = datetime.now().astimezone()
         return LevelResult(
             level=LEVEL_ID,

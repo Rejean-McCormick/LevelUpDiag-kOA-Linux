@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import importlib.util
+import io
 import os
 from importlib.machinery import SourceFileLoader
 from pathlib import Path
+import tarfile
 import zipfile
 
 from levelupdiag_core.config import AppConfig
@@ -81,6 +83,39 @@ def test_contaminated_zip_fails_without_extraction(tmp_path: Path, monkeypatch) 
     with zipfile.ZipFile(delivery, "w") as archive:
         archive.writestr("opt/tools/levelupdiag_manifest.json", "{}")
         archive.writestr("usr/bin/koa-tool", "safe")
+    monkeypatch.setenv("LEVELUPDIAG_DELIVERY_TARGET", str(delivery))
+
+    result = module.run(_config(tmp_path))
+
+    assert result.verdict == FAIL
+    assert any(finding.path == "opt/tools/levelupdiag_manifest.json" for finding in result.findings)
+    assert not (tmp_path / "opt").exists()
+
+
+def test_clean_tar_passes_without_extraction(tmp_path: Path, monkeypatch) -> None:
+    module = _load_level()
+    delivery = tmp_path / "delivery.tar"
+    with tarfile.open(delivery, "w") as archive:
+        payload = b"safe"
+        info = tarfile.TarInfo("usr/bin/koa-tool")
+        info.size = len(payload)
+        archive.addfile(info, io.BytesIO(payload))
+    monkeypatch.setenv("LEVELUPDIAG_DELIVERY_TARGET", str(delivery))
+
+    result = module.run(_config(tmp_path))
+
+    assert result.verdict == PASS
+    assert not (tmp_path / "usr").exists()
+
+
+def test_contaminated_tar_fails_without_extraction(tmp_path: Path, monkeypatch) -> None:
+    module = _load_level()
+    delivery = tmp_path / "delivery.tar"
+    with tarfile.open(delivery, "w") as archive:
+        payload = b"{}"
+        info = tarfile.TarInfo("opt/tools/levelupdiag_manifest.json")
+        info.size = len(payload)
+        archive.addfile(info, io.BytesIO(payload))
     monkeypatch.setenv("LEVELUPDIAG_DELIVERY_TARGET", str(delivery))
 
     result = module.run(_config(tmp_path))

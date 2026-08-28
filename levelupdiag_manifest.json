@@ -73,7 +73,8 @@
       "required": true,
       "depends_on": [
         "N01",
-        "N02"
+        "N02",
+        "N04"
       ],
       "timeout_seconds": 600,
       "purpose": "Run the public component validations."
@@ -85,8 +86,9 @@
       "enabled": true,
       "required": false,
       "depends_on": [
-        "N04",
-        "N05"
+        "N01",
+        "N02",
+        "N04"
       ],
       "timeout_seconds": 600,
       "purpose": "Run public integration validations when configured."
@@ -98,8 +100,9 @@
       "enabled": true,
       "required": false,
       "depends_on": [
-        "N04",
-        "N05"
+        "N01",
+        "N02",
+        "N04"
       ],
       "timeout_seconds": 600,
       "purpose": "Run public profile validations when configured."
@@ -112,7 +115,9 @@
       "required": false,
       "depends_on": [
         "N01",
-        "N02"
+        "N02",
+        "N04",
+        "N05"
       ],
       "timeout_seconds": 900,
       "purpose": "Run the configured public security validation."
@@ -125,7 +130,9 @@
       "required": false,
       "depends_on": [
         "N01",
-        "N02"
+        "N02",
+        "N04",
+        "N05"
       ],
       "timeout_seconds": 900,
       "purpose": "Run the configured public offline validation."
@@ -138,7 +145,9 @@
       "required": false,
       "depends_on": [
         "N01",
-        "N02"
+        "N02",
+        "N04",
+        "N05"
       ],
       "timeout_seconds": 1200,
       "purpose": "Run the configured public system validation."
