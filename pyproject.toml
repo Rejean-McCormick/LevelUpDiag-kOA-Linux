@@ -1,21 +1,10 @@
-[build-system]
-requires = ["setuptools>=68"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "levelupdiag-koali"
-version = "0.1.0"
-description = "Standalone diagnostic and validation appendix for kOA-Linux development."
-readme = "README.md"
-requires-python = ">=3.11"
+version = "2.0.0"
+description = "Evolved copy-in LevelUpDiag specialization for kOA-Linux"
+requires-python = ">=3.10"
 dependencies = []
 
-[project.optional-dependencies]
-dev = [
-  "pytest>=8",
-]
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["levelupdiag_core*"]
-exclude = ["tests*", "docs*", "levels*", "scripts*"]
+[tool.levelupdiag]
+mode = "copy-in-koali-specialization"
+sequence = "N00-N11-serial"

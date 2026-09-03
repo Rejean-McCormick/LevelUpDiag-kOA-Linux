@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "levelupdiag.report.v2",
+  "title": "LevelUpDiag Level Report v2",
+  "type": "object",
+  "required": [
+    "schema",
+    "standard",
+    "standard_version",
+    "run_id",
+    "level_id",
+    "level_name",
+    "target_repo_root",
+    "verdict",
+    "findings",
+    "artifacts"
+  ],
+  "properties": {
+    "schema": {
+      "const": "levelupdiag.report.v2"
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "WARN",
+        "FAIL",
+        "SKIP",
+        "BLOCKED",
+        "PARTIAL",
+        "ERROR",
+        "INFRA_ERROR",
+        "CONFIG_ERROR"
+      ]
+    },
+    "findings": {
+      "type": "array"
+    },
+    "artifacts": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

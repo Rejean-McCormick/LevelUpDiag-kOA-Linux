@@ -1,0 +1,37 @@
+{
+  "schema": "levelupdiag.config.v2",
+  "app_name": "kOA-Linux",
+  "target_repo_root": "auto",
+  "control_dir": ".levelupdiag",
+  "execution": {
+    "max_parallel": 1,
+    "default_timeout_seconds": 120,
+    "fail_fast": false,
+    "capture_limit_kb": 256,
+    "protect_tracked_files": true,
+    "allow_target_mutation": false,
+    "allow_network": false
+  },
+  "toolchain": {
+    "required": ["python"],
+    "optional": ["git", "cargo", "uv"]
+  },
+  "commands": {
+    "docs": ["python", "docs/tools/validate_docs.py"],
+    "contracts": ["python", "ci/scripts/run-contracts.py"],
+    "components": ["python", "ci/scripts/run-components.py"],
+    "integrations": [],
+    "security": ["python", "ci/scripts/run-security.py"],
+    "offline": ["python", "ci/scripts/run-offline.py"],
+    "system": ["python", "ci/scripts/run-system-tests.py"]
+  },
+  "profiles_command": ["uv", "run", "--frozen", "pytest", "-q", "tests/profiles"],
+  "delivery_target": "",
+  "env": {},
+  "redaction": {"enabled": true, "replacement": "<REDACTED>"},
+  "koa": {
+    "gate_report_directory": "koa-ci-evidence",
+    "gate_report_suffix": "-gate-report.json",
+    "gate_report_capture_kb": 128
+  }
+}

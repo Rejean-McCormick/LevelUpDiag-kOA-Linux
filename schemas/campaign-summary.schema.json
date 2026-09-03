@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "levelupdiag.campaign-summary.v2",
+  "title": "LevelUpDiag Campaign Summary v2",
+  "type": "object",
+  "required": [
+    "schema",
+    "run_id",
+    "selection",
+    "target_repo_root",
+    "verdict",
+    "expected_levels",
+    "required_levels",
+    "levels"
+  ],
+  "properties": {
+    "schema": {
+      "const": "levelupdiag.campaign-summary.v2"
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "WARN",
+        "FAIL",
+        "BLOCKED",
+        "ERROR"
+      ]
+    },
+    "expected_levels": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "levels": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

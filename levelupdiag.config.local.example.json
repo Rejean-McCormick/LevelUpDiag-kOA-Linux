@@ -1,0 +1,8 @@
+{
+  "schema": "levelupdiag.config.v2",
+  "delivery_target": "dist/koa-linux.zip",
+  "commands": {
+    "integrations": ["python", "ci/scripts/run-integrations.py"]
+  },
+  "env": {}
+}
