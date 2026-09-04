@@ -1,8 +1,11 @@
 {
   "schema": "levelupdiag.config.v2",
-  "delivery_target": "dist/koa-linux.zip",
+  "default_mode": "debug",
+  "delivery_target": "",
   "commands": {
-    "integrations": ["python", "ci/scripts/run-integrations.py"]
+    "integrations": []
   },
-  "env": {}
+  "env": {
+    "KOA_CI_EVIDENCE_DIR": ".levelupdiag/koa-ci-evidence"
+  }
 }

@@ -1,19 +1,23 @@
-# Architecture
+# Architecture — Debug-first policy
 
-LevelUpDiag-Koali v2 is a target-specific specialization of the LevelUpDiag v2 copy-in frame.
+LevelUpDiag-Koali separates **observation**, **conformance**, and **release provenance**.
 
-The diagnostic code lives under `levelupdiag/`; generated evidence lives under `.levelupdiag/` at the kOA-Linux repository root. The target is read-oriented by design. Commands are executed with `shell=false`, outputs are bounded/redacted, and tracked Git state is compared before and after each campaign.
+The tool code lives in this directory and generated evidence lives under `.levelupdiag/` in the target. Commands execute with `shell=false`, bounded/redacted output, explicit timeouts, and process isolation.
 
-## Execution model
+## DEBUG
 
-The runner builds a campaign from `levelupdiag_manifest.json`, expands transitive dependencies, then schedules ready levels by `order`.
+DEBUG is the default execution policy. It does not snapshot or compare Git state globally. Dependency verdicts do not suppress downstream diagnostic levels. A local `BLOCKED`, `FAIL`, `CONFIG_ERROR`, or repository formality remains evidence for that level while independent diagnostics continue.
 
-For Koali every level has `parallel_safe: false`. Therefore only one level is active at a time and the stable N00-N11 order is preserved even if `--jobs` is greater than one.
+The default `debug` campaign excludes N02 Repository/Structure, N03 Documentation, and N11 Delivery.
 
-Dependencies retain their original semantic purpose: they identify evidence that must exist before another level can be meaningful. Ordering alone is not encoded as fake dependencies.
+## VALIDATION
 
-## Result model
+VALIDATION includes formal conformance levels. Hard prerequisite states (`BLOCKED`, `ERROR`, `INFRA_ERROR`, `CONFIG_ERROR`) can block declared dependants. Git cleanliness is still not a global prerequisite.
 
-Each level emits a normalized v2 JSON result. Campaign verdicts distinguish target failure from missing prerequisites, infrastructure failure, and diagnostic configuration errors.
+## RELEASE
 
-Historical standalone `.pyw` persistence and `output.log` files have been removed. Command tails and referenced gate evidence are embedded in bounded structured findings instead.
+RELEASE enables tracked Git-state protection and strict dependency semantics. This is the only default mode where before/after Git tracked-state comparison is part of campaign integrity.
+
+## Dependency topology
+
+Repository conformance is no longer a functional prerequisite. N04 depends on N01 rather than N02; N05 depends on N01/N04; runtime gates depend on N01/N04/N05. This prevents repository formalities from entering a functional debug selection through transitive dependencies.

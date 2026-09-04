@@ -32,6 +32,21 @@ def effective_env(cfg) -> dict[str, str]:
     return env
 
 
+def referenced_command_paths(target: Path, argv: list[str]) -> list[Path]:
+    """Return relative file arguments that the configured validator expects to exist."""
+    paths: list[Path] = []
+    for token in argv[1:]:
+        if not token or token.startswith("-"):
+            continue
+        candidate = Path(token)
+        if candidate.is_absolute():
+            continue
+        if candidate.suffix.casefold() not in {".py", ".json", ".toml", ".yaml", ".yml"}:
+            continue
+        paths.append(target / candidate)
+    return paths
+
+
 def referenced_gate_reports(cfg, output: str) -> list[dict]:
     """Read only explicitly referenced kOA-Linux gate reports inside the target repo."""
     target = Path(cfg["_target_root"]).resolve()
@@ -103,6 +118,25 @@ def run_validation(
             evidence=str(exc),
         )
         return
+
+    missing_paths = [p for p in referenced_command_paths(target, argv) if not p.is_file()]
+    if missing_paths:
+        relative = []
+        for p in missing_paths:
+            try:
+                relative.append(p.relative_to(target).as_posix())
+            except ValueError:
+                relative.append(str(p))
+        report.add(
+            f"{report.level_id.lower()}.{command_key or 'command'}.path",
+            "CONFIG_ERROR",
+            "configuration",
+            "Configured kOA-Linux validation command references file(s) that do not exist under target_repo_root.",
+            evidence={"target_repo_root": str(target), "missing_paths": relative, "argv": argv},
+            recommendation="Verify target_repo_root and keep the validator paths aligned with the kOA-Linux repository documentation.",
+        )
+        return
+
     try:
         result = run_command(
             argv,
@@ -128,6 +162,14 @@ def run_validation(
     evidence = dict(result)
     if reports:
         evidence["referenced_gate_reports"] = reports
+        for item in reports:
+            path = item.get("path")
+            if path:
+                report.artifact(
+                    "koa_gate_report",
+                    path,
+                    "Referenced kOA-Linux CI gate report captured from the target repository.",
+                )
     missing = missing_python_modules(combined)
     if missing:
         evidence["missing_python_modules"] = missing

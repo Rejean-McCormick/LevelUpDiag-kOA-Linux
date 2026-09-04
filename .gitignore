@@ -2,3 +2,4 @@
 levelupdiag.config.local.json
 __pycache__/
 *.py[cod]
+/GitSink.bat

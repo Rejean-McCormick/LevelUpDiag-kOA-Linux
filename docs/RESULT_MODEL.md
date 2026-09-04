@@ -1,13 +1,26 @@
 # Result model
 
-Level verdicts: `PASS`, `WARN`, `FAIL`, `SKIP`, `BLOCKED`, `PARTIAL`, `ERROR`, `INFRA_ERROR`, `CONFIG_ERROR`.
+Level verdicts remain:
 
-For Koali:
+`PASS`, `WARN`, `FAIL`, `SKIP`, `BLOCKED`, `PARTIAL`, `ERROR`, `INFRA_ERROR`, `CONFIG_ERROR`.
 
-- `FAIL`: an executed target validator returned a functional failure.
-- `SKIP`: an optional Koali validator is not configured.
-- `BLOCKED`: prerequisite evidence is unavailable or a Koali public gate explicitly reports a blocked condition.
-- `INFRA_ERROR`: a command could not complete because of execution infrastructure such as a timeout or launch failure.
-- `CONFIG_ERROR`: the LevelUpDiag setup or a required command is invalid/missing.
+Their meaning is local to a level. `BLOCKED` means that level could not establish its intended evidence because a prerequisite was unavailable. It does not mean every independent diagnostic must stop.
 
-The structured command evidence is stored in each level `result.json`; separate legacy `output.log` files are intentionally not produced.
+Campaign summaries add:
+
+- `diagnostic_mode`: `debug`, `validation`, or `release`;
+- `execution_verdict`: whether the diagnostic machinery completed without `ERROR`/`INFRA_ERROR`;
+- `testability`: `COMPLETE` or `PARTIAL`;
+- `conformance_verdict`: `NOT_EVALUATED` in DEBUG, otherwise the strict campaign verdict.
+
+## DEBUG aggregation
+
+- any `ERROR`/`INFRA_ERROR` -> campaign `ERROR`;
+- any other non-PASS local verdict -> campaign `WARN`;
+- otherwise -> `PASS`.
+
+Thus target failures and missing prerequisites remain visible without turning routine development diagnosis into a global `BLOCKED` state.
+
+## VALIDATION / RELEASE aggregation
+
+Strict evidence semantics are preserved. `FAIL` remains failure, required unavailable evidence can block completion, and configuration/diagnostic errors are not accepted as success.

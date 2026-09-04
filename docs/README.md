@@ -1,7 +1,7 @@
-# LevelUpDiag-Koali v2 documentation
+# LevelUpDiag-Koali documentation
 
-- `ARCHITECTURE.md` — evolved engine and execution model.
-- `KOALI_SEQUENCE.md` — canonical N00-N11 sequence and Koali checks.
-- `MIGRATION_FROM_V1.md` — what was preserved and what was replaced.
-- `SECURITY_MODEL.md` — subprocess, evidence, redaction, and target-safety rules.
-- `RESULT_MODEL.md` — verdict semantics.
+- `ARCHITECTURE.md` — DEBUG / VALIDATION / RELEASE separation and dependency topology.
+- `KOALI_SEQUENCE.md` — N00-N11 roles and DEBUG principal selection.
+- `RESULT_MODEL.md` — local verdicts and campaign aggregation.
+- `SECURITY_MODEL.md` — bounded execution and mode-scoped Git protection.
+- `MIGRATION_FROM_V1.md` — migration to the v2.1 debug-first model.

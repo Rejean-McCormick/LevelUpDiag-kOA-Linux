@@ -1,29 +1,16 @@
-# Migration from LevelUpDiag-Koali v1
+# Migration notes — v2.1 debug-first policy
 
-## Preserved
+Version 2.1 retains N00-N11 and the existing Koali validators but changes orchestration semantics.
 
-- N00-N11 identities and primary order.
-- Required/optional intent of N01-N11.
-- Koali command defaults for docs, contracts, components, security, offline, and system.
-- Optional integrations command.
-- Fixed N07 profile command using `uv --frozen` and `tests/profiles`.
-- Git repository observations.
-- missing-Python-module diagnosis.
-- trusted `koa-ci-evidence/*-gate-report.json` expansion concept.
-- `security: blocked`, `offline: blocked`, and `system: blocked` semantics.
-- N11 delivery-residue inspection.
+Key changes:
 
-## Replaced by the evolved frame
+1. `debug` is the default campaign and mode.
+2. N02 Repository/Structure and N03 Documentation are removed from the primary debug campaign.
+3. N04-N10 no longer depend transitively on N02.
+4. DEBUG has no dependency-blocking verdict set: independent evidence continues to be collected.
+5. DEBUG does not snapshot or compare tracked Git state.
+6. VALIDATION keeps conformance checks and strict dependency semantics without global Git cleanliness enforcement.
+7. RELEASE keeps strict tracked-state protection and delivery/finalization checks.
+8. Campaign summaries separate diagnostic execution, testability, and conformance.
 
-- old runner/planner/model/report implementations;
-- old per-level `.pyw` persistence;
-- GUI/control-panel wrapper;
-- `logs.py` and historical `output.log` format;
-- standalone sibling-repository assumption;
-- duplicated level command/parsing code.
-
-The new runner provides isolated workers, campaigns, structured summaries, bounded output, redaction, Git mutation protection, explicit timeouts, and deterministic scheduling.
-
-## Deliberate ordering upgrade
-
-The old manifest allowed several independent levels to be parallelized even though documentation presented N00-N11 as the primary progression. In v2, all Koali levels are `parallel_safe: false`; therefore the visible test sequence is deterministic and is treated as part of the Koali contract.
+Historical campaign names remain available for compatibility, but new automation should use `debug`, `structure`, `validation`, or `release` explicitly.

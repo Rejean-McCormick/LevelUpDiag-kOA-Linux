@@ -38,8 +38,17 @@ def resolve_selection(manifest, name):
         selected = {name}
     elif name in manifest.get("campaigns", {}):
         selected = set(manifest["campaigns"][name].get("levels", []))
+    elif "," in name:
+        requested = [item.strip().upper() for item in name.split(",") if item.strip()]
+        if not requested:
+            raise ManifestError("Level selection is empty")
+        unknown = sorted(set(requested) - set(lm))
+        if unknown:
+            raise ManifestError("Unknown level(s): " + ", ".join(unknown))
+        selected = set(requested)
     else:
         raise ManifestError(f"Unknown level or campaign: {name}")
+
     # Add transitive dependencies.
     changed = True
     while changed:
@@ -47,5 +56,6 @@ def resolve_selection(manifest, name):
         for lid in list(selected):
             for dep in lm[lid].get("depends_on", []):
                 if dep not in selected:
-                    selected.add(dep); changed = True
+                    selected.add(dep)
+                    changed = True
     return sorted((lm[x] for x in selected), key=lambda x: (x.get("order", 0), x["id"]))

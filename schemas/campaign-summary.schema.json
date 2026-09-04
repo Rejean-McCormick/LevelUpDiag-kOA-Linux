@@ -34,6 +34,28 @@
     },
     "levels": {
       "type": "array"
+    },
+    "diagnostic_mode": {
+      "enum": [
+        "debug",
+        "validation",
+        "release"
+      ]
+    },
+    "execution_verdict": {
+      "enum": [
+        "PASS",
+        "ERROR"
+      ]
+    },
+    "testability": {
+      "enum": [
+        "COMPLETE",
+        "PARTIAL"
+      ]
+    },
+    "conformance_verdict": {
+      "type": "string"
     }
   },
   "additionalProperties": true

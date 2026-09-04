@@ -1,11 +1,18 @@
 # Security model
 
-- Diagnostic target defaults to the parent repository and can be overridden explicitly.
-- Subprocesses execute with argument vectors and `shell=false`.
-- Generated evidence lives under `.levelupdiag/`.
-- Captured command output is bounded.
-- Common passwords, secrets, API keys, access/auth tokens, and bearer tokens are redacted.
-- Referenced Koali gate reports are read only if they resolve inside the target repository, live below a `koa-ci-evidence` path component, and end with `-gate-report.json`.
-- Repository scans do not need to follow file symlinks.
-- The campaign runner snapshots tracked Git state before and after diagnostics and reports `ERROR` if tracked state changes.
-- N11 explicitly checks that diagnostic residue does not enter a delivery directory or supported archive.
+LevelUpDiag-Koali remains read-oriented and bounded:
+
+- commands execute as argument arrays with `shell=false`;
+- stdout/stderr capture is bounded and redacted;
+- target mutation is disabled by default;
+- network use is disabled unless explicitly enabled;
+- referenced gate reports are accepted only from bounded paths inside the target repository;
+- worker timeouts remain explicit.
+
+Git tracked-state protection is now **mode-scoped**:
+
+- DEBUG: disabled; Git provenance is not a prerequisite for diagnosis;
+- VALIDATION: disabled globally; N02 can still observe repository state when selected;
+- RELEASE: enabled and tracked-state mutation during diagnostics is an error.
+
+This keeps release provenance strict without making Git formalities part of ordinary system debugging.

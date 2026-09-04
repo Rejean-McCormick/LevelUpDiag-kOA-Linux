@@ -3,28 +3,311 @@
   "standard": "LevelUpDiag",
   "standard_version": "1.0.0",
   "suite_name": "LevelUpDiag-Koali",
-  "suite_version": "2.0.0",
-  "repository_mode": "copy-in-target-repository",
+  "suite_version": "2.1.0",
+  "repository_mode": "sibling-specialization",
   "control_dir_default": ".levelupdiag",
   "levels": [
-    {"id":"N00","name":"Diagnostic Integrity","module":"levels.n00_diagnostic_integrity","category":"diagnostics","order":0,"required":true,"depends_on":[],"timeout_seconds":60,"parallel_safe":false,"purpose":"Validate the upgraded LevelUpDiag-Koali frame before trusting target evidence."},
-    {"id":"N01","name":"Environment","module":"levels.n01_environment","category":"environment","order":10,"required":true,"depends_on":["N00"],"timeout_seconds":120,"parallel_safe":false,"purpose":"Verify the kOA-Linux target path, Python runtime, and configured toolchain."},
-    {"id":"N02","name":"Repository","module":"levels.n02_repository","category":"repository","order":20,"required":true,"depends_on":["N01"],"timeout_seconds":120,"parallel_safe":false,"purpose":"Observe the kOA-Linux checkout and Git state without modifying it."},
-    {"id":"N03","name":"Documentation","module":"levels.n03_documentation","category":"validation","order":30,"required":true,"depends_on":["N01","N02"],"timeout_seconds":300,"parallel_safe":false,"purpose":"Run the configured public kOA-Linux documentation validation."},
-    {"id":"N04","name":"Contracts","module":"levels.n04_contracts","category":"validation","order":40,"required":true,"depends_on":["N01","N02"],"timeout_seconds":300,"parallel_safe":false,"purpose":"Run the public kOA-Linux contracts validation."},
-    {"id":"N05","name":"Components","module":"levels.n05_components","category":"validation","order":50,"required":true,"depends_on":["N01","N02","N04"],"timeout_seconds":600,"parallel_safe":false,"purpose":"Run the public kOA-Linux component validations."},
-    {"id":"N06","name":"Integrations","module":"levels.n06_integrations","category":"validation","order":60,"required":false,"depends_on":["N01","N02","N04"],"timeout_seconds":600,"parallel_safe":false,"purpose":"Run public kOA-Linux integration validations when configured."},
-    {"id":"N07","name":"Profiles","module":"levels.n07_profiles","category":"validation","order":70,"required":false,"depends_on":["N01","N02","N04"],"timeout_seconds":600,"parallel_safe":false,"purpose":"Run the kOA-Linux profile pytest suite through uv with the frozen environment."},
-    {"id":"N08","name":"Security","module":"levels.n08_security","category":"validation","order":80,"required":false,"depends_on":["N01","N02","N04","N05"],"timeout_seconds":900,"parallel_safe":false,"purpose":"Run the configured public kOA-Linux security validation and preserve BLOCKED gate semantics."},
-    {"id":"N09","name":"Offline","module":"levels.n09_offline","category":"validation","order":90,"required":false,"depends_on":["N01","N02","N04","N05"],"timeout_seconds":900,"parallel_safe":false,"purpose":"Run the configured public kOA-Linux offline validation and preserve BLOCKED gate semantics."},
-    {"id":"N10","name":"System","module":"levels.n10_system","category":"validation","order":100,"required":false,"depends_on":["N01","N02","N04","N05"],"timeout_seconds":1200,"parallel_safe":false,"purpose":"Run the configured public kOA-Linux system validation and preserve BLOCKED gate semantics."},
-    {"id":"N11","name":"Delivery","module":"levels.n11_delivery","category":"delivery","order":110,"required":false,"depends_on":["N01"],"timeout_seconds":300,"parallel_safe":false,"purpose":"Verify that LevelUpDiag-Koali is absent from a configured delivery target."}
+    {
+      "id": "N00",
+      "name": "Diagnostic Integrity",
+      "module": "levels.n00_diagnostic_integrity",
+      "category": "diagnostics",
+      "order": 0,
+      "required": true,
+      "depends_on": [],
+      "timeout_seconds": 60,
+      "parallel_safe": false,
+      "purpose": "Validate the LevelUpDiag-Koali frame before trusting target evidence."
+    },
+    {
+      "id": "N01",
+      "name": "Environment",
+      "module": "levels.n01_environment",
+      "category": "environment",
+      "order": 10,
+      "required": true,
+      "depends_on": [
+        "N00"
+      ],
+      "timeout_seconds": 120,
+      "parallel_safe": false,
+      "purpose": "Verify the kOA-Linux target path, Python runtime, and configured toolchain."
+    },
+    {
+      "id": "N02",
+      "name": "Repository / Structure",
+      "module": "levels.n02_repository",
+      "category": "conformance",
+      "order": 20,
+      "required": false,
+      "depends_on": [
+        "N01"
+      ],
+      "timeout_seconds": 120,
+      "parallel_safe": false,
+      "purpose": "Observe repository and Git context. Advisory in DEBUG; conformance evidence in VALIDATION/RELEASE."
+    },
+    {
+      "id": "N03",
+      "name": "Documentation",
+      "module": "levels.n03_documentation",
+      "category": "conformance",
+      "order": 30,
+      "required": false,
+      "depends_on": [
+        "N01"
+      ],
+      "timeout_seconds": 300,
+      "parallel_safe": false,
+      "purpose": "Run the configured kOA-Linux documentation validation without gating functional debug."
+    },
+    {
+      "id": "N04",
+      "name": "Contracts",
+      "module": "levels.n04_contracts",
+      "category": "functional",
+      "order": 40,
+      "required": true,
+      "depends_on": [
+        "N01"
+      ],
+      "timeout_seconds": 300,
+      "parallel_safe": false,
+      "purpose": "Run the public kOA-Linux contracts validation independently of repository cleanliness formalities."
+    },
+    {
+      "id": "N05",
+      "name": "Components",
+      "module": "levels.n05_components",
+      "category": "functional",
+      "order": 50,
+      "required": true,
+      "depends_on": [
+        "N01",
+        "N04"
+      ],
+      "timeout_seconds": 600,
+      "parallel_safe": false,
+      "purpose": "Run the public kOA-Linux component validations."
+    },
+    {
+      "id": "N06",
+      "name": "Integrations",
+      "module": "levels.n06_integrations",
+      "category": "functional",
+      "order": 60,
+      "required": false,
+      "depends_on": [
+        "N01",
+        "N04"
+      ],
+      "timeout_seconds": 600,
+      "parallel_safe": false,
+      "purpose": "Run public kOA-Linux integration validations when configured."
+    },
+    {
+      "id": "N07",
+      "name": "Profiles",
+      "module": "levels.n07_profiles",
+      "category": "functional",
+      "order": 70,
+      "required": false,
+      "depends_on": [
+        "N01",
+        "N04"
+      ],
+      "timeout_seconds": 600,
+      "parallel_safe": false,
+      "purpose": "Run the kOA-Linux profile pytest suite through uv with the frozen environment."
+    },
+    {
+      "id": "N08",
+      "name": "Security Runtime",
+      "module": "levels.n08_security",
+      "category": "runtime",
+      "order": 80,
+      "required": false,
+      "depends_on": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "timeout_seconds": 900,
+      "parallel_safe": false,
+      "purpose": "Run the configured kOA-Linux security validation; unavailable prerequisites remain local to this level in DEBUG."
+    },
+    {
+      "id": "N09",
+      "name": "Offline Runtime",
+      "module": "levels.n09_offline",
+      "category": "runtime",
+      "order": 90,
+      "required": false,
+      "depends_on": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "timeout_seconds": 900,
+      "parallel_safe": false,
+      "purpose": "Run the configured kOA-Linux offline validation; unavailable prerequisites remain local to this level in DEBUG."
+    },
+    {
+      "id": "N10",
+      "name": "System Runtime",
+      "module": "levels.n10_system",
+      "category": "runtime",
+      "order": 100,
+      "required": false,
+      "depends_on": [
+        "N01",
+        "N04",
+        "N05"
+      ],
+      "timeout_seconds": 1200,
+      "parallel_safe": false,
+      "purpose": "Run the configured kOA-Linux system validation; unavailable prerequisites remain local to this level in DEBUG."
+    },
+    {
+      "id": "N11",
+      "name": "Delivery",
+      "module": "levels.n11_delivery",
+      "category": "release",
+      "order": 110,
+      "required": false,
+      "depends_on": [
+        "N01"
+      ],
+      "timeout_seconds": 300,
+      "parallel_safe": false,
+      "purpose": "Verify that LevelUpDiag-Koali is absent from a configured delivery target."
+    }
   ],
   "campaigns": {
-    "preflight": {"description":"Validate LevelUpDiag, environment, and repository context.","levels":["N00","N01","N02"]},
-    "core": {"description":"Run the required kOA-Linux validation sequence through Components.","levels":["N00","N01","N02","N03","N04","N05"]},
-    "standard": {"description":"Run the normal kOA-Linux sequence without the delivery appendix check.","levels":["N00","N01","N02","N03","N04","N05","N06","N07","N08","N09","N10"]},
-    "delivery": {"description":"Verify a configured delivery target contains no LevelUpDiag-Koali residue.","levels":["N00","N01","N11"]},
-    "full": {"description":"Run the entire kOA-Linux sequence including delivery inspection.","levels":["N00","N01","N02","N03","N04","N05","N06","N07","N08","N09","N10","N11"]}
+    "debug": {
+      "mode": "debug",
+      "description": "Primary non-blocking functional/runtime diagnosis. Repository/documentation formalities are not selected.",
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
+    "structure": {
+      "mode": "validation",
+      "description": "Repository structure and documentation conformance checks.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03"
+      ]
+    },
+    "validation": {
+      "mode": "validation",
+      "description": "Run the complete non-release validation sequence.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
+    "release": {
+      "mode": "release",
+      "description": "Strict full sequence including tracked-state protection and delivery inspection.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10",
+        "N11"
+      ]
+    },
+    "preflight": {
+      "mode": "validation",
+      "description": "Compatibility alias: diagnostic integrity, environment, and repository context.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02"
+      ]
+    },
+    "core": {
+      "mode": "validation",
+      "description": "Compatibility alias: validation sequence through Components.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05"
+      ]
+    },
+    "standard": {
+      "mode": "validation",
+      "description": "Compatibility alias for the historical N00-N10 validation campaign.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
+    "delivery": {
+      "mode": "release",
+      "description": "Strict delivery inspection with release policy.",
+      "levels": [
+        "N00",
+        "N01",
+        "N11"
+      ]
+    },
+    "full": {
+      "mode": "release",
+      "description": "Compatibility alias for strict release/finalization N00-N11.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10",
+        "N11"
+      ]
+    }
   }
 }

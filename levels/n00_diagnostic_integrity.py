@@ -3,6 +3,7 @@ import importlib.util
 import sys
 from pathlib import Path
 from levelupdiag_core.manifest import load_manifest
+from levelupdiag_core.modes import VALID_MODES
 
 EXPECTED = [f"N{i:02d}" for i in range(12)]
 REQUIRED_COMMANDS = {"docs", "contracts", "components", "integrations", "security", "offline", "system"}
@@ -27,6 +28,14 @@ def run(cfg, report):
     missing_keys = sorted(REQUIRED_COMMANDS - set(commands))
     report.add("koali.commands.contract", "PASS" if not missing_keys else "CONFIG_ERROR", "configuration",
                "Koali command configuration contract is present." if not missing_keys else "Koali command configuration keys are missing.", evidence=missing_keys or sorted(REQUIRED_COMMANDS))
+    campaigns = manifest.get("campaigns", {})
+    missing_modes = [m for m in VALID_MODES if m not in {c.get("mode") for c in campaigns.values() if isinstance(c, dict)}]
+    report.add("diagnostics.modes.present", "PASS" if not missing_modes else "CONFIG_ERROR", "diagnostics",
+               "DEBUG, VALIDATION, and RELEASE policies are represented in the campaign manifest." if not missing_modes else "One or more diagnostic modes are missing from campaigns.", evidence=missing_modes or list(VALID_MODES))
+    debug_levels = set(campaigns.get("debug", {}).get("levels", []))
+    formal = sorted(debug_levels & {"N02", "N03", "N11"})
+    report.add("diagnostics.debug.decoupled", "PASS" if not formal else "CONFIG_ERROR", "diagnostics",
+               "Primary DEBUG is decoupled from repository/documentation/release formalities." if not formal else "Primary DEBUG still selects formal conformance levels.", evidence=formal or sorted(debug_levels))
     schema_dir = tool / "schemas"
     absent = [p.name for p in (schema_dir/"report.schema.json", schema_dir/"campaign-summary.schema.json") if not p.exists()]
     report.add("diagnostics.schemas.present", "PASS" if not absent else "CONFIG_ERROR", "diagnostics",
