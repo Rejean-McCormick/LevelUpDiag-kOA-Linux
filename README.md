@@ -1,12 +1,38 @@
-# LevelUpDiag-Koali v2.1
+# LevelUpDiag-Koali v2.2
 
-LevelUpDiag-Koali 2.1 is a **debug-first** diagnostic suite for kOA-Linux.
-Its primary rule is:
+LevelUpDiag-Koali 2.2 is a **core-stabilization-first** diagnostic suite for kOA-Linux. The primary development objective is to stabilize the Koali environment and native core before independent subsystems are integrated.
+
+Its primary rules are:
 
 > If a formality does not materially prevent observation or execution of the system, it must not block DEBUG.
+>
+> Missing independent subsystems must not be falsified as admitted dependencies merely to advance core stabilization.
 
 Repository cleanliness, frozen architecture conformance, documentation conformance, delivery residue, signatures, and release provenance remain available as validation/finalization evidence, but they are no longer prerequisites for the main debug path.
 
+
+
+## Koali core stabilization scope
+
+The default campaign is now `stabilization`:
+
+```text
+N00 Diagnostic Integrity
+N01 Environment
+N04 Contracts
+N05 Components
+```
+
+This scope deliberately defers independent subsystems while the Koali host/build/runtime environment is being stabilized:
+
+```text
+Konnaxion          placeholder_until_integration
+Ariane             deferred_until_koali_integration_test
+Orgo               draft_not_admitted
+Semantik Architect deferred_not_admitted
+```
+
+This does **not** weaken or rewrite the canonical `sovereign-linux-node` profile. Full-target VALIDATION and RELEASE remain strict and can still report those subsystem authorities as unresolved. The `stabilization-runtime` campaign adds N08/N09/N10 when a bootable image/runtime context becomes available, while retaining DEBUG non-blocking campaign semantics.
 
 ## Repository layout
 
@@ -48,7 +74,7 @@ Use for strict finalization. Tracked Git state is snapshotted before and after t
 ```bash
 python levelupdiag.py doctor
 python levelupdiag.py list
-python levelupdiag.py run debug
+python levelupdiag.py run stabilization
 ```
 
 Explicit modes are supported:
@@ -71,7 +97,7 @@ Linux/macOS launcher default:
 ./RUN_LEVELUPDIAG.sh
 ```
 
-Both now default to the `debug` campaign.
+Both now default to the `stabilization` campaign.
 
 ## Console
 
@@ -83,10 +109,12 @@ Both now default to the `debug` campaign.
 
 Presets:
 
-- **DEBUG PRINCIPAL**: N00, N01, N04-N10
-- **STRUCTURE / CONFORMITÉ**: N00-N03
+- **STABILISATION KOALI**: N00, N01, N04, N05
+- **RUNTIME CORE**: N00, N01, N04, N05, N08, N09, N10
+- **DEBUG COMPLET**: N00, N01, N04-N10
+- **STRUCTURE**: N00-N03
 - **VALIDATION**: N00-N10
-- **FINALISATION**: N00-N11
+- **RELEASE**: N00-N11
 
 N02 Repository and N03 Documentation are intentionally absent from DEBUG PRINCIPAL.
 
@@ -113,7 +141,9 @@ Functional levels no longer depend transitively on N02. Selecting `N08,N09,N10` 
 
 ## Campaigns
 
-- `debug` — primary development diagnosis, mode DEBUG.
+- `stabilization` — primary pre-subsystem Koali core stabilization, mode DEBUG.
+- `stabilization-runtime` — core runtime qualification when image/QEMU context exists, mode DEBUG.
+- `debug` — broader development diagnosis including integration/profile/runtime levels, mode DEBUG.
 - `structure` — repository/documentation checks, mode VALIDATION.
 - `validation` — N00-N10, mode VALIDATION.
 - `release` — N00-N11, mode RELEASE.
@@ -182,3 +212,7 @@ Evidence remains under the target repository:
 ```
 
 Commands use `shell=false`; output is bounded and redacted; target mutation remains disabled by configuration.
+
+## Version 2.2.0
+
+2.2.0 changes the default workflow from broad debug to explicit **Koali core stabilization before subsystem integration**. It also requires the core Rust/native toolchain in N01 (`git`, `cargo`, `rustc`, `cc`), adds qualification-scope metadata to campaign summaries, and provides compatibility aliases plus `scripts/run_level.py` for older Koali Control Panel integrations.

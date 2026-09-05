@@ -3,7 +3,7 @@
   "standard": "LevelUpDiag",
   "standard_version": "1.0.0",
   "suite_name": "LevelUpDiag-Koali",
-  "suite_version": "2.1.0",
+  "suite_version": "2.2.0",
   "repository_mode": "sibling-specialization",
   "control_dir_default": ".levelupdiag",
   "levels": [
@@ -31,7 +31,7 @@
       ],
       "timeout_seconds": 120,
       "parallel_safe": false,
-      "purpose": "Verify the kOA-Linux target path, Python runtime, and configured toolchain."
+      "purpose": "Verify the kOA-Linux target path and the complete core build toolchain (Python/uv/Git/Rust/Cargo/native linker) before subsystem integration."
     },
     {
       "id": "N02",
@@ -103,7 +103,7 @@
       ],
       "timeout_seconds": 600,
       "parallel_safe": false,
-      "purpose": "Run public kOA-Linux integration validations when configured."
+      "purpose": "Run public kOA-Linux integration validations when explicitly selected. External subsystems are deferred from the core-stabilization campaign."
     },
     {
       "id": "N07",
@@ -184,6 +184,43 @@
     }
   ],
   "campaigns": {
+    "stabilization": {
+      "mode": "debug",
+      "scope": "koali_core_pre_subsystem",
+      "description": "Primary Koali core stabilization: diagnostic integrity, environment, contracts and native components only. External subsystems are intentionally deferred.",
+      "deferred_subsystems": [
+        "konnaxion",
+        "ariane",
+        "orgo",
+        "semantik_architect"
+      ],
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05"
+      ]
+    },
+    "stabilization-runtime": {
+      "mode": "debug",
+      "scope": "koali_core_pre_subsystem_runtime",
+      "description": "Exploratory core runtime qualification after an image exists. External subsystem closure is not a prerequisite for running these diagnostics, but kOA validators may still report final-profile blockers.",
+      "deferred_subsystems": [
+        "konnaxion",
+        "ariane",
+        "orgo",
+        "semantik_architect"
+      ],
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
     "debug": {
       "mode": "debug",
       "description": "Primary non-blocking functional/runtime diagnosis. Repository/documentation formalities are not selected.",
@@ -308,6 +345,95 @@
         "N10",
         "N11"
       ]
+    },
+    "developer-fast": {
+      "mode": "debug",
+      "scope": "koali_core_pre_subsystem",
+      "description": "Compatibility alias for Koali core stabilization.",
+      "deferred_subsystems": [
+        "konnaxion",
+        "ariane",
+        "orgo",
+        "semantik_architect"
+      ],
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05"
+      ]
+    },
+    "bundle-validation": {
+      "mode": "debug",
+      "scope": "koali_core_pre_subsystem",
+      "description": "Compatibility alias for pre-subsystem build stabilization.",
+      "deferred_subsystems": [
+        "konnaxion",
+        "ariane",
+        "orgo",
+        "semantik_architect"
+      ],
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05"
+      ]
+    },
+    "nightly": {
+      "mode": "validation",
+      "description": "Compatibility alias for full non-release validation.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
+    "release-preparation": {
+      "mode": "release",
+      "description": "Compatibility alias for strict release preparation.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10",
+        "N11"
+      ]
+    },
+    "delivery-check": {
+      "mode": "release",
+      "description": "Compatibility alias for strict delivery inspection.",
+      "levels": [
+        "N00",
+        "N01",
+        "N11"
+      ]
+    }
+  },
+  "qualification_scopes": {
+    "koali_core_pre_subsystem": {
+      "purpose": "Stabilize Koali environment/contracts/native components before integrating independent subsystems.",
+      "final_profile_unchanged": "sovereign-linux-node",
+      "subsystem_policy": "deferred_not_faked"
+    },
+    "full_target": {
+      "purpose": "Evaluate the canonical target including required independent subsystems.",
+      "final_profile": "sovereign-linux-node"
     }
   }
 }

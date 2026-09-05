@@ -14,14 +14,14 @@ from .worker import run_worker
 
 
 def parser():
-    p = argparse.ArgumentParser(prog="levelupdiag", description="Debug-first LevelUpDiag specialization for kOA-Linux")
+    p = argparse.ArgumentParser(prog="levelupdiag", description="Core-stabilization-first LevelUpDiag specialization for kOA-Linux")
     p.add_argument("--target", help="Target repository root (default from configuration)")
     sub = p.add_subparsers(dest="cmd", required=True)
     sub.add_parser("doctor", help="Validate LevelUpDiag setup and target resolution")
     sub.add_parser("list", help="List levels and campaigns")
     sub.add_parser("show-config", help="Print effective configuration")
     r = sub.add_parser("run", help="Run a campaign or level")
-    r.add_argument("selection", nargs="?", default="debug")
+    r.add_argument("selection", nargs="?", default="stabilization")
     r.add_argument("--mode", choices=VALID_MODES, help="Override campaign policy mode")
     r.add_argument("--jobs", type=int, help="Maximum parallel level workers")
     r.add_argument("--fail-fast", action="store_true")
@@ -73,6 +73,12 @@ def main(argv=None):
             print(f"LevelUpDiag {args.selection} [{summary['diagnostic_mode'].upper()}]: {summary['verdict']}")
             print(f"  Diagnostic execution: {summary['execution_verdict']}")
             print(f"  System testability:    {summary['testability']}")
+            print(f"  Qualification scope:  {summary.get('qualification_scope', 'ad_hoc')}")
+            deferred = summary.get('deferred_subsystems', [])
+            print(f"  Deferred subsystems:   {', '.join(deferred) if deferred else 'none'}")
+            states = summary.get('deferred_subsystem_states', {})
+            if isinstance(states, dict) and states:
+                print("  Subsystem states:      " + ", ".join(f"{name}={state}" for name, state in states.items()))
             print(f"  Conformance:           {summary['conformance_verdict']}")
             for row in summary["levels"]:
                 print(f"  {row['id']}  {row['verdict']:<12} {row['name']}")

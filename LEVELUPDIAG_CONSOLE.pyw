@@ -21,7 +21,7 @@ TOOL_ROOT = Path(__file__).resolve().parent
 class LevelUpDiagConsole(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("LevelUpDiag-Koali 2.1 — Debug First")
+        self.title("LevelUpDiag-Koali 2.2 — Core Stabilization First")
         self.minsize(900, 720)
         self.geometry("1040x820")
 
@@ -43,14 +43,15 @@ class LevelUpDiagConsole(tk.Tk):
         header = ttk.Frame(outer)
         header.pack(fill="x")
         ttk.Label(header, text="LevelUpDiag-Koali", font=("Segoe UI", 14, "bold")).pack(side="left")
-        self.status_var = tk.StringVar(value="Prêt — DEBUG")
+        self.status_var = tk.StringVar(value="Prêt — STABILISATION KOALI")
         ttk.Label(header, textvariable=self.status_var).pack(side="right")
 
         ttk.Label(
             outer,
             text=(
-                "DEBUG continue tant que le système reste observable. Les formalités Git, structure, documentation "
-                "et release sont séparées et ne bloquent pas le debug principal."
+                "STABILISATION KOALI vérifie d'abord l'environnement, les contrats et les composants natifs. "
+                "Konnaxion reste placeholder; Ariane, Orgo et Semantik Architect sont différés jusqu'à l'intégration explicite. "
+                "Le profil souverain final reste strict et n'est pas affaibli."
             ),
             wraplength=980,
         ).pack(anchor="w", pady=(4, 10))
@@ -66,12 +67,12 @@ class LevelUpDiagConsole(tk.Tk):
 
         presets = ttk.Frame(outer)
         presets.pack(fill="x", pady=(0, 8))
-        ttk.Button(presets, text="DEBUG PRINCIPAL", command=lambda: self._select_campaign("debug", "debug")).pack(side="left", padx=(0, 6))
-        ttk.Button(presets, text="STRUCTURE / CONFORMITÉ", command=lambda: self._select_campaign("structure", "validation")).pack(side="left", padx=6)
-        ttk.Button(presets, text="VALIDATION", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=6)
-        ttk.Button(presets, text="FINALISATION", command=lambda: self._select_campaign("release", "release")).pack(side="left", padx=6)
-        ttk.Button(presets, text="TOUS", command=self._select_all).pack(side="left", padx=6)
-        ttk.Button(presets, text="AUCUN", command=self._select_none).pack(side="left", padx=6)
+        ttk.Button(presets, text="STABILISATION KOALI", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=(0, 5))
+        ttk.Button(presets, text="RUNTIME CORE", command=lambda: self._select_campaign("stabilization-runtime", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="DEBUG COMPLET", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="STRUCTURE", command=lambda: self._select_campaign("structure", "validation")).pack(side="left", padx=5)
+        ttk.Button(presets, text="VALIDATION", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=5)
+        ttk.Button(presets, text="RELEASE", command=lambda: self._select_campaign("release", "release")).pack(side="left", padx=5)
 
         self.level_frame = ttk.LabelFrame(outer, text="Niveaux")
         self.level_frame.pack(fill="x")
@@ -147,7 +148,7 @@ class LevelUpDiagConsole(tk.Tk):
     def _mode_changed(self) -> None:
         mode = self.mode_var.get()
         if mode == "debug":
-            text = "DEBUG: aucune dépendance de niveau ne bloque la collecte; Git/structure/release ne sont pas protégés ni exigés."
+            text = "DEBUG/STABILISATION: les blockers restent locaux. Le scope core ne prétend pas qualifier les sous-systèmes différés ni le profil souverain final."
         elif mode == "validation":
             text = "VALIDATION: les erreurs de configuration/infrastructure et BLOCKED peuvent bloquer leurs dépendants; Git propre n'est pas imposé globalement."
         else:
@@ -164,6 +165,16 @@ class LevelUpDiagConsole(tk.Tk):
                 return str(console_python)
         return str(executable)
 
+    def _campaign_for_selected(self, selected: list[str], mode: str) -> str | None:
+        wanted = set(selected)
+        preferred = ("stabilization", "stabilization-runtime", "debug", "structure", "validation", "release")
+        campaigns = self.manifest.get("campaigns", {})
+        for name in preferred:
+            meta = campaigns.get(name, {})
+            if meta.get("mode") == mode and set(meta.get("levels", [])) == wanted:
+                return name
+        return None
+
     def _run_selected(self) -> None:
         if self.process is not None:
             messagebox.showinfo("LevelUpDiag", "Un diagnostic est déjà en cours.")
@@ -174,8 +185,8 @@ class LevelUpDiagConsole(tk.Tk):
             messagebox.showwarning("LevelUpDiag", "Sélectionne au moins un niveau.")
             return
 
-        selection = ",".join(selected)
         mode = self.mode_var.get()
+        selection = self._campaign_for_selected(selected, mode) or ",".join(selected)
         command = [
             self._python_executable(), str(TOOL_ROOT / "levelupdiag.py"),
             "run", selection, "--mode", mode,

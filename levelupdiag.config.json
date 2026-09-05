@@ -15,11 +15,14 @@
   "toolchain": {
     "required": [
       "python",
-      "uv"
+      "uv",
+      "git",
+      "cargo",
+      "rustc",
+      "cc"
     ],
     "optional": [
-      "git",
-      "cargo"
+      "rustup"
     ]
   },
   "environment_sync_command": [
@@ -120,6 +123,17 @@
         "CONFIG_ERROR"
       ],
       "campaign_policy": "release"
+    }
+  },
+  "default_campaign": "stabilization",
+  "qualification": {
+    "default_scope": "koali_core_pre_subsystem",
+    "final_profile": "sovereign-linux-node",
+    "deferred_subsystems": {
+      "konnaxion": "placeholder_until_integration",
+      "ariane": "deferred_until_koali_integration_test",
+      "orgo": "draft_not_admitted",
+      "semantik_architect": "deferred_not_admitted"
     }
   }
 }

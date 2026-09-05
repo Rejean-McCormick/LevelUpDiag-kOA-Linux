@@ -52,6 +52,15 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
     effective_mode = _selection_mode(manifest, selection, mode, cfg)
     policy = policy_for(cfg, effective_mode)
     cfg["_mode"] = effective_mode
+    campaign_meta = manifest.get("campaigns", {}).get(selection, {}) if isinstance(manifest.get("campaigns", {}), dict) else {}
+    qualification_scope = str(campaign_meta.get("scope", "ad_hoc" if selection not in manifest.get("campaigns", {}) else "full_target"))
+    deferred_subsystems = [str(x) for x in campaign_meta.get("deferred_subsystems", []) if str(x)] if isinstance(campaign_meta, dict) else []
+    qualification_cfg = cfg.get("qualification", {}) if isinstance(cfg.get("qualification", {}), dict) else {}
+    configured_states = qualification_cfg.get("deferred_subsystems", {})
+    deferred_subsystem_states = (
+        {name: str(configured_states.get(name, "deferred")) for name in deferred_subsystems}
+        if isinstance(configured_states, dict) else {}
+    )
     levels = resolve_selection(manifest, selection)
     target = Path(cfg["_target_root"])
     control = Path(cfg["_control_root"])
@@ -226,6 +235,8 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
     summary = {
         "schema":SUMMARY_SCHEMA,"standard":"LevelUpDiag","standard_version":VERSION,
         "run_id":run_id,"selection":selection,"diagnostic_mode":effective_mode,
+        "qualification_scope":qualification_scope,"deferred_subsystems":deferred_subsystems,
+        "deferred_subsystem_states":deferred_subsystem_states,
         "target_repo_root":str(target),"started_at":started,"ended_at":utc_now(),
         "verdict":verdict,"execution_verdict":exec_verdict,"testability":testability(ordered),
         "conformance_verdict":"NOT_EVALUATED" if effective_mode == "debug" else verdict,
@@ -242,6 +253,9 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
         f"Run: {run_id}", f"Target: {target}",
         f"Diagnostic execution: {exec_verdict}",
         f"System testability: {summary['testability']}",
+        f"Qualification scope: {qualification_scope}",
+        f"Deferred subsystems: {', '.join(deferred_subsystems) if deferred_subsystems else 'none'}",
+        f"Subsystem states: {', '.join(f'{name}={state}' for name, state in deferred_subsystem_states.items()) if deferred_subsystem_states else 'none'}",
         f"Conformance: {summary['conformance_verdict']}", "",
     ]
     txt += [f"{r['level_id']:>3}  {r['verdict']:<12} {r['level_name']}" for r in ordered]

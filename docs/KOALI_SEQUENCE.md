@@ -1,20 +1,31 @@
-# Koali diagnostic sequence
+# Koali sequence — LevelUpDiag 2.2
 
-| Order | Level | Role | DEBUG principal |
-|---:|---|---|---|
-| 0 | N00 Diagnostic Integrity | diagnostic framework | yes |
-| 10 | N01 Environment | executable environment | yes |
-| 20 | N02 Repository / Structure | conformance / Git observation | no |
-| 30 | N03 Documentation | conformance | no |
-| 40 | N04 Contracts | functional contract checks | yes |
-| 50 | N05 Components | component checks | yes |
-| 60 | N06 Integrations | integration checks | yes |
-| 70 | N07 Profiles | profile checks | yes |
-| 80 | N08 Security Runtime | runtime/security evidence | yes |
-| 90 | N09 Offline Runtime | offline evidence | yes |
-| 100 | N10 System Runtime | system/QEMU evidence | yes |
-| 110 | N11 Delivery | finalization | no |
+## Phase 1: stabilize Koali core
 
-All levels remain serial to preserve deterministic evidence ordering.
+Run `stabilization` first. It validates diagnostic integrity, the complete host/build environment, canonical contracts, and native component validations. Independent subsystems are intentionally deferred and must not be marked pinned or activable unless their real source authority has been integrated and verified.
 
-The key v2.1 change is dependency separation: N02/N03 are no longer transitive prerequisites of functional/runtime levels.
+```text
+PREPARE DEVELOPMENT ENVIRONMENT
+→ LevelUpDiag stabilization
+→ build/verify native Koali components
+→ repeat until the environment is stable
+```
+
+Deferred during this phase:
+
+- Konnaxion: placeholder until real integration.
+- Ariane: integrate and test next.
+- Orgo: draft/not admitted.
+- Semantik Architect: deferred/not admitted.
+
+## Phase 2: core runtime
+
+When a bootable image exists, run `stabilization-runtime`. N08/N09/N10 remain diagnostic in DEBUG; final-profile blockers remain visible but do not redefine the core-stabilization scope.
+
+## Phase 3: subsystem integration
+
+Integrate each independent subsystem with real source pins, digests, license/documentation evidence, adapter tests, and activation evidence.
+
+## Phase 4: final target
+
+Use `validation` and `release` against the unchanged canonical `sovereign-linux-node` target. No partial conformance is claimed.
