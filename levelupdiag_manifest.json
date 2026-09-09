@@ -103,7 +103,7 @@
       ],
       "timeout_seconds": 600,
       "parallel_safe": false,
-      "purpose": "Run public kOA-Linux integration validations when explicitly selected. External subsystems are deferred from the core-stabilization campaign."
+      "purpose": "Run public kOA-Linux integration validations when explicitly selected and, when configured, diagnose standalone/integrated product UI modularity without making optional products core prerequisites."
     },
     {
       "id": "N07",

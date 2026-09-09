@@ -135,5 +135,10 @@
       "orgo": "draft_not_admitted",
       "semantik_architect": "deferred_not_admitted"
     }
+  },
+  "ui_modularity": {
+    "enabled": false,
+    "base_root": "..",
+    "products": []
   }
 }

@@ -7,5 +7,10 @@
   },
   "env": {
     "KOA_CI_EVIDENCE_DIR": ".levelupdiag/koa-ci-evidence"
+  },
+  "ui_modularity": {
+    "enabled": false,
+    "base_root": "..",
+    "products": []
   }
 }

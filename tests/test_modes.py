@@ -1,7 +1,11 @@
 import unittest
 
 from levelupdiag_core.modes import normalize_mode, policy_for
-from levelupdiag_core.verdicts import campaign_verdict, execution_verdict, testability
+from levelupdiag_core.verdicts import (
+    campaign_verdict,
+    execution_verdict,
+    testability as compute_testability,
+)
 
 
 class ModeTests(unittest.TestCase):
@@ -26,7 +30,7 @@ class ModeTests(unittest.TestCase):
         required = {"N00":True, "N08":False, "N10":False, "N02":False}
         self.assertEqual(campaign_verdict(levels, required, "debug"), "WARN")
         self.assertEqual(execution_verdict(levels), "PASS")
-        self.assertEqual(testability(levels), "PARTIAL")
+        self.assertEqual(compute_testability(levels), "PARTIAL")
 
     def test_debug_execution_error_remains_error(self):
         levels = [{"level_id":"N00", "verdict":"INFRA_ERROR"}]

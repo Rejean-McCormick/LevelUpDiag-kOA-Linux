@@ -21,7 +21,7 @@ TOOL_ROOT = Path(__file__).resolve().parent
 class LevelUpDiagConsole(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("LevelUpDiag-Koali 2.2 — Core Stabilization First")
+        self.title("LevelUpDiag-Koali 2.3 — Core Stabilization + Modular Integration")
         self.minsize(900, 720)
         self.geometry("1040x820")
 
@@ -69,7 +69,7 @@ class LevelUpDiagConsole(tk.Tk):
         presets.pack(fill="x", pady=(0, 8))
         ttk.Button(presets, text="STABILISATION KOALI", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=(0, 5))
         ttk.Button(presets, text="RUNTIME CORE", command=lambda: self._select_campaign("stabilization-runtime", "debug")).pack(side="left", padx=5)
-        ttk.Button(presets, text="DEBUG COMPLET", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="DEBUG COMPLET", command=lambda: self._select_campaign("debug", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="STRUCTURE", command=lambda: self._select_campaign("structure", "validation")).pack(side="left", padx=5)
         ttk.Button(presets, text="VALIDATION", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=5)
         ttk.Button(presets, text="RELEASE", command=lambda: self._select_campaign("release", "release")).pack(side="left", padx=5)

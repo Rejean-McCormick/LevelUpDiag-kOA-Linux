@@ -1,6 +1,6 @@
-# LevelUpDiag-Koali v2.2
+# LevelUpDiag-Koali v2.3
 
-LevelUpDiag-Koali 2.2 is a **core-stabilization-first** diagnostic suite for kOA-Linux. The primary development objective is to stabilize the Koali environment and native core before independent subsystems are integrated.
+LevelUpDiag-Koali 2.3 is a **core-stabilization-first** diagnostic suite for kOA-Linux. The primary development objective is to stabilize the Koali environment and native core before independent subsystems are integrated.
 
 Its primary rules are:
 
@@ -150,6 +150,43 @@ Functional levels no longer depend transitively on N02. Selecting `N08,N09,N10` 
 
 Compatibility aliases remain: `preflight`, `core`, `standard`, `delivery`, `full`.
 
+## Modular product UI diagnostics
+
+LevelUpDiag does **not** define the Koali UX, shell implementation, product manifest filename, or product framework. Those remain owned by Koali documentation and the individual products.
+
+N06 can optionally diagnose consequences of the Koali modular-UI contract when `ui_modularity.enabled` is set in local configuration. The diagnostic is read-only and configuration-driven:
+
+- an optional product repository may be absent and that absence is accepted as an independent-removal state;
+- a required product repository that is unavailable reports `BLOCKED`;
+- configured standalone markers can verify that a product retains its own runnable UI entry point or equivalent product-owned surface;
+- configured integration markers can verify that the product exposes its declared integrated contribution;
+- configured dependency scan files can reject explicit private cross-product UI dependency tokens;
+- LevelUpDiag does not invent or hard-code Orgo, Konnaxion, Kristal, Spaces, or other product UI file names.
+
+Example local policy:
+
+```json
+{
+  "ui_modularity": {
+    "enabled": true,
+    "base_root": "..",
+    "products": [
+      {
+        "id": "example-product",
+        "root": "example-product",
+        "required": false,
+        "standalone_markers": ["<product-owned standalone marker>"],
+        "integration_markers": ["<public Koali integration marker>"],
+        "scan_files": ["<dependency manifest or source file>"],
+        "forbidden_private_ui_tokens": ["<private cross-product UI import token>"]
+      }
+    ]
+  }
+}
+```
+
+The example deliberately uses placeholders: concrete marker paths belong to each product's admitted contract, not to LevelUpDiag. This check is outside the `stabilization` campaign and therefore cannot turn a missing optional UI product into a Koali core-stabilization prerequisite.
+
 ## Result model
 
 A campaign summary now separates:
@@ -213,6 +250,12 @@ Evidence remains under the target repository:
 
 Commands use `shell=false`; output is bounded and redacted; target mutation remains disabled by configuration.
 
+## Version 2.3.0
+
+2.3.0 keeps the 2.2 core-stabilization policy and adds opt-in N06 diagnostics for modular product user interfaces. The new check validates only explicitly configured product roots, standalone/integration markers, and private-dependency tokens; it does not define the Koali UI architecture itself. Optional product absence is accepted as a valid independent-removal state.
+
+It also fixes the desktop console's **DEBUG COMPLET** preset so it selects the `debug` campaign rather than `stabilization`.
+
 ## Version 2.2.0
 
-2.2.0 changes the default workflow from broad debug to explicit **Koali core stabilization before subsystem integration**. It also requires the core Rust/native toolchain in N01 (`git`, `cargo`, `rustc`, `cc`), adds qualification-scope metadata to campaign summaries, and provides compatibility aliases plus `scripts/run_level.py` for older Koali Control Panel integrations.
+2.2.0 changed the default workflow from broad debug to explicit **Koali core stabilization before subsystem integration**. It also requires the core Rust/native toolchain in N01 (`git`, `cargo`, `rustc`, `cc`), adds qualification-scope metadata to campaign summaries, and provides compatibility aliases plus `scripts/run_level.py` for older Koali Control Panel integrations.
