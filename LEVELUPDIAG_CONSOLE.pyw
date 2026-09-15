@@ -13,6 +13,7 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from levelupdiag_core.config import load_config
+from levelupdiag_core.execution_backend import ExecutionBackendError, build_launch_plan
 from levelupdiag_core.manifest import load_manifest
 
 TOOL_ROOT = Path(__file__).resolve().parent
@@ -21,7 +22,7 @@ TOOL_ROOT = Path(__file__).resolve().parent
 class LevelUpDiagConsole(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("LevelUpDiag-Koali 2.3 — Core Stabilization + Modular Integration")
+        self.title("LevelUpDiag-Koali 2.4.1 — WSL-aware Total Audit")
         self.minsize(900, 720)
         self.geometry("1040x820")
 
@@ -31,6 +32,7 @@ class LevelUpDiagConsole(tk.Tk):
         self.level_names: dict[str, str] = {}
         self.manifest: dict = {}
         self.mode_var = tk.StringVar(value="debug")
+        self.backend_var = tk.StringVar(value="Backend: AUTO")
 
         self._build_ui()
         self._load_levels()
@@ -44,7 +46,10 @@ class LevelUpDiagConsole(tk.Tk):
         header.pack(fill="x")
         ttk.Label(header, text="LevelUpDiag-Koali", font=("Segoe UI", 14, "bold")).pack(side="left")
         self.status_var = tk.StringVar(value="Prêt — STABILISATION KOALI")
-        ttk.Label(header, textvariable=self.status_var).pack(side="right")
+        right_header = ttk.Frame(header)
+        right_header.pack(side="right")
+        ttk.Label(right_header, textvariable=self.status_var).pack(anchor="e")
+        ttk.Label(right_header, textvariable=self.backend_var).pack(anchor="e")
 
         ttk.Label(
             outer,
@@ -70,6 +75,7 @@ class LevelUpDiagConsole(tk.Tk):
         ttk.Button(presets, text="STABILISATION KOALI", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=(0, 5))
         ttk.Button(presets, text="RUNTIME CORE", command=lambda: self._select_campaign("stabilization-runtime", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="DEBUG COMPLET", command=lambda: self._select_campaign("debug", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="AUDIT TOTAL", command=lambda: self._select_campaign("audit-total", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="STRUCTURE", command=lambda: self._select_campaign("structure", "validation")).pack(side="left", padx=5)
         ttk.Button(presets, text="VALIDATION", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=5)
         ttk.Button(presets, text="RELEASE", command=lambda: self._select_campaign("release", "release")).pack(side="left", padx=5)
@@ -167,7 +173,7 @@ class LevelUpDiagConsole(tk.Tk):
 
     def _campaign_for_selected(self, selected: list[str], mode: str) -> str | None:
         wanted = set(selected)
-        preferred = ("stabilization", "stabilization-runtime", "debug", "structure", "validation", "release")
+        preferred = ("stabilization", "stabilization-runtime", "debug", "audit-total", "structure", "validation", "release")
         campaigns = self.manifest.get("campaigns", {})
         for name in preferred:
             meta = campaigns.get(name, {})
@@ -187,12 +193,19 @@ class LevelUpDiagConsole(tk.Tk):
 
         mode = self.mode_var.get()
         selection = self._campaign_for_selected(selected, mode) or ",".join(selected)
-        command = [
-            self._python_executable(), str(TOOL_ROOT / "levelupdiag.py"),
-            "run", selection, "--mode", mode,
-        ]
+        try:
+            cfg = load_config(TOOL_ROOT)
+            plan = build_launch_plan(
+                TOOL_ROOT, selection, mode, cfg, native_python=self._python_executable()
+            )
+        except (ExecutionBackendError, OSError, ValueError) as exc:
+            self.backend_var.set("Backend: ERREUR")
+            messagebox.showerror("LevelUpDiag", f"Backend d'exécution indisponible:\n{exc}")
+            return
 
-        self._append(f"\n$ {' '.join(command)}\n")
+        command = list(plan.command)
+        self.backend_var.set(f"Backend: {plan.label}")
+        self._append(f"\n[{plan.label}]\n$ {' '.join(command)}\n")
         self.status_var.set(f"Exécution {mode.upper()}: {selection}")
         self.run_button.configure(state="disabled")
         self.stop_button.configure(state="normal")

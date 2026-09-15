@@ -1,4 +1,5 @@
 from pathlib import Path
+import tomllib
 import unittest
 
 from levelupdiag_core.manifest import load_manifest, resolve_selection
@@ -20,6 +21,17 @@ class ManifestTests(unittest.TestCase):
         self.assertNotIn("N02", selected)
         self.assertNotIn("N03", selected)
         self.assertNotIn("N11", selected)
+
+    def test_audit_total_preserves_n00_to_n10_non_blocking_scope(self):
+        m = load_manifest(ROOT)
+        self.assertEqual([x["id"] for x in resolve_selection(m, "audit-total")], [f"N{i:02d}" for i in range(11)])
+        self.assertEqual(m["campaigns"]["audit-total"]["mode"], "debug")
+        self.assertEqual(m["campaigns"]["audit-total"]["scope"], "full_target_diagnostic")
+
+    def test_suite_version_matches_package_version(self):
+        m = load_manifest(ROOT)
+        project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+        self.assertEqual(m["suite_version"], project["project"]["version"])
 
     def test_validation_preserves_n00_to_n10(self):
         m = load_manifest(ROOT)

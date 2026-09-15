@@ -12,5 +12,16 @@
     "enabled": false,
     "base_root": "..",
     "products": []
+  },
+  "desktop_console": {
+    "execution_backend": "auto",
+    "wsl_python_candidates": [
+      "python3",
+      "python"
+    ],
+    "wsl_path_prepend": [
+      "~/.local/bin",
+      "~/.cargo/bin"
+    ]
   }
 }

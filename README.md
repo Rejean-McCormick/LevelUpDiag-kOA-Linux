@@ -1,4 +1,4 @@
-# LevelUpDiag-Koali v2.3
+# LevelUpDiag-Koali v2.4
 
 LevelUpDiag-Koali 2.3 is a **core-stabilization-first** diagnostic suite for kOA-Linux. The primary development objective is to stabilize the Koali environment and native core before independent subsystems are integrated.
 
@@ -101,7 +101,7 @@ Both now default to the `stabilization` campaign.
 
 ## Console
 
-`LEVELUPDIAG_CONSOLE.pyw` exposes three policies:
+`LEVELUPDIAG_CONSOLE.pyw` exposes three policies and an execution backend. With `desktop_console.execution_backend = "auto"`, Windows uses WSL automatically; Linux/macOS use the native interpreter. The Windows UI does not silently fall back to native Python if WSL is unavailable.
 
 - **DEBUG — non bloquant**
 - **VALIDATION — conformité**
@@ -112,6 +112,7 @@ Presets:
 - **STABILISATION KOALI**: N00, N01, N04, N05
 - **RUNTIME CORE**: N00, N01, N04, N05, N08, N09, N10
 - **DEBUG COMPLET**: N00, N01, N04-N10
+- **AUDIT TOTAL**: N00-N10 in DEBUG non-blocking mode, one-pass complete diagnostic evidence without a conformance or delivery claim
 - **STRUCTURE**: N00-N03
 - **VALIDATION**: N00-N10
 - **RELEASE**: N00-N11
@@ -144,6 +145,7 @@ Functional levels no longer depend transitively on N02. Selecting `N08,N09,N10` 
 - `stabilization` — primary pre-subsystem Koali core stabilization, mode DEBUG.
 - `stabilization-runtime` — core runtime qualification when image/QEMU context exists, mode DEBUG.
 - `debug` — broader development diagnosis including integration/profile/runtime levels, mode DEBUG.
+- `audit-total` — N00-N10 in one non-blocking DEBUG pass, scope `full_target_diagnostic`.
 - `structure` — repository/documentation checks, mode VALIDATION.
 - `validation` — N00-N10, mode VALIDATION.
 - `release` — N00-N11, mode RELEASE.
@@ -249,6 +251,16 @@ Evidence remains under the target repository:
 ```
 
 Commands use `shell=false`; output is bounded and redacted; target mutation remains disabled by configuration.
+
+## Version 2.4.1
+
+2.4.1 fixes the WSL environment inherited by the Windows desktop console. A direct `wsl.exe --exec` launch can expose a narrower `PATH` than an interactive WSL session, which made user-installed `uv`, Cargo, Rust and rustup disappear even though the run was correctly executing under WSL.
+
+The WSL backend now probes `HOME` and `PATH` with the selected WSL Python interpreter, prepends the configurable `desktop_console.wsl_path_prepend` entries (default: `~/.local/bin` and `~/.cargo/bin`), and launches LevelUpDiag through `/usr/bin/env`. The Windows subprocess still uses `shell=false`; no login shell or profile-script dependency is introduced.
+
+## Version 2.4.0
+
+2.4.0 made desktop execution environment-aware. On Windows, the console `auto` backend launches LevelUpDiag through `wsl.exe --exec` and resolves the script path with `wslpath`, preventing Windows Python from producing misleading Linux-toolchain failures. It also added **AUDIT TOTAL**, a named N00-N10 DEBUG campaign for complete one-pass evidence collection, and aligned `levelupdiag_manifest.json` suite version with the package/UI version.
 
 ## Version 2.3.0
 

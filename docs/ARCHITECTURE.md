@@ -28,3 +28,14 @@ Repository conformance is no longer a functional prerequisite. N04 depends on N0
 LevelUpDiag is an observer of Koali product-UI modularity, not the owner of that architecture. N06 can consume an explicit local `ui_modularity` policy and test product availability, product-owned standalone markers, public integrated-contribution markers, and explicitly forbidden private cross-product UI dependency tokens.
 
 The check is intentionally configuration-driven so LevelUpDiag does not hard-code product frameworks or manifest names. Optional product absence is a valid state and reports `PASS` for the removal observation; required product absence can report `BLOCKED`. The core `stabilization` campaign does not select N06, so UI-product lifecycle remains outside core stabilization.
+
+## Desktop execution backend
+
+The desktop console separates the Windows UI host from the Linux qualification runtime. `desktop_console.execution_backend = "auto"` means WSL on Windows and native execution elsewhere. WSL launch uses argument arrays (`wsl.exe --exec`), not a shell command string. If WSL is unavailable, AUTO fails explicitly rather than silently reinterpreting Linux toolchain absence as target failure.
+
+The `audit-total` campaign selects N00-N10 under DEBUG semantics so every independent level can produce evidence in one pass. It is diagnostic evidence, not a conformance or delivery claim.
+
+
+## Windows desktop / WSL tool PATH
+
+The Windows desktop console executes Linux qualification through WSL. Because `wsl.exe --exec` may expose a narrower PATH than an interactive WSL terminal, the backend probes WSL `HOME` and `PATH` using the selected Python interpreter, prepends the configured `desktop_console.wsl_path_prepend` entries (default: `~/.local/bin`, `~/.cargo/bin`), and launches LevelUpDiag through `/usr/bin/env`. No login shell or shell command string is required.

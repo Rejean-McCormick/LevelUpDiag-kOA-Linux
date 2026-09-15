@@ -1,6 +1,6 @@
 [project]
 name = "levelupdiag-koali"
-version = "2.3.0"
+version = "2.4.1"
 description = "Core-stabilization-first LevelUpDiag specialization for kOA-Linux"
 requires-python = ">=3.10"
 dependencies = []

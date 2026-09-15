@@ -3,7 +3,7 @@
   "standard": "LevelUpDiag",
   "standard_version": "1.0.0",
   "suite_name": "LevelUpDiag-Koali",
-  "suite_version": "2.2.0",
+  "suite_version": "2.4.1",
   "repository_mode": "sibling-specialization",
   "control_dir_default": ".levelupdiag",
   "levels": [
@@ -236,6 +236,24 @@
         "N10"
       ]
     },
+    "audit-total": {
+      "mode": "debug",
+      "scope": "full_target_diagnostic",
+      "description": "Complete non-blocking repository/runtime diagnostic: N00-N10. Collects all available evidence in one pass without claiming conformance or delivery qualification.",
+      "levels": [
+        "N00",
+        "N01",
+        "N02",
+        "N03",
+        "N04",
+        "N05",
+        "N06",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
     "structure": {
       "mode": "validation",
       "description": "Repository structure and documentation conformance checks.",
@@ -434,6 +452,12 @@
     "full_target": {
       "purpose": "Evaluate the canonical target including required independent subsystems.",
       "final_profile": "sovereign-linux-node"
+    },
+    "full_target_diagnostic": {
+      "purpose": "Collect complete N00-N10 diagnostic evidence in one non-blocking pass.",
+      "final_profile_unchanged": "sovereign-linux-node",
+      "conformance_claimed": false,
+      "delivery_qualification_included": false
     }
   }
 }
