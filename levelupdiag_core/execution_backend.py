@@ -25,9 +25,13 @@ class LaunchPlan:
         return f"{self.backend.upper()} / {self.runtime}"
 
 
-def _backend_name(cfg: dict, platform_name: str) -> str:
+def _backend_name(cfg: dict, platform_name: str, selection: str | None = None) -> str:
     section = cfg.get("desktop_console", {})
-    requested = str(section.get("execution_backend", "auto")).strip().casefold()
+    campaign_backends = section.get("campaign_backends", {})
+    requested_value = section.get("execution_backend", "auto")
+    if selection and isinstance(campaign_backends, dict) and selection in campaign_backends:
+        requested_value = campaign_backends[selection]
+    requested = str(requested_value).strip().casefold()
     if requested not in {"auto", "native", "wsl"}:
         raise ExecutionBackendError(
             "desktop_console.execution_backend must be one of: auto, native, wsl"
@@ -41,10 +45,11 @@ def _wsl_path(
     path: Path,
     *,
     wsl_executable: str,
+    distro: str = "",
     run: Callable[..., subprocess.CompletedProcess[str]],
 ) -> str:
     result = run(
-        [wsl_executable, "--exec", "wslpath", "-a", "-u", str(path)],
+        [wsl_executable, *(["-d", distro] if distro else []), "--exec", "wslpath", "-a", "-u", str(path)],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -53,6 +58,7 @@ def _wsl_path(
         errors="replace",
         shell=False,
         check=False,
+        timeout=30,
     )
     converted = (result.stdout or "").strip()
     if result.returncode != 0 or not converted.startswith("/"):
@@ -64,6 +70,7 @@ def _wsl_path(
 def _wsl_python(
     *,
     wsl_executable: str,
+    distro: str = "",
     candidates: Iterable[str],
     run: Callable[..., subprocess.CompletedProcess[str]],
 ) -> str:
@@ -74,7 +81,7 @@ def _wsl_python(
             continue
         checked.append(candidate)
         result = run(
-            [wsl_executable, "--exec", candidate, "--version"],
+            [wsl_executable, *(["-d", distro] if distro else []), "--exec", candidate, "--version"],
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
@@ -83,6 +90,7 @@ def _wsl_python(
             errors="replace",
             shell=False,
             check=False,
+            timeout=30,
         )
         if result.returncode == 0:
             return candidate
@@ -95,6 +103,7 @@ def _wsl_python(
 def _wsl_environment(
     *,
     wsl_executable: str,
+    distro: str = "",
     python: str,
     path_prepend: Iterable[str],
     run: Callable[..., subprocess.CompletedProcess[str]],
@@ -112,7 +121,7 @@ def _wsl_environment(
         "'path': os.environ.get('PATH', '')}))"
     )
     result = run(
-        [wsl_executable, "--exec", python, "-c", probe],
+        [wsl_executable, *(["-d", distro] if distro else []), "--exec", python, "-c", probe],
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
@@ -121,6 +130,7 @@ def _wsl_environment(
         errors="replace",
         shell=False,
         check=False,
+        timeout=30,
     )
     if result.returncode != 0:
         detail = (result.stderr or result.stdout or "WSL environment probe failed").strip()
@@ -171,7 +181,7 @@ def build_launch_plan(
     """
 
     host = os.name if platform_name is None else platform_name
-    backend = _backend_name(cfg, host)
+    backend = _backend_name(cfg, host, selection)
     script = tool_root / "levelupdiag.py"
 
     if backend == "native":
@@ -194,23 +204,30 @@ def build_launch_plan(
         )
 
     section = cfg.get("desktop_console", {})
+    distro = str(section.get("wsl_distro", "")).strip()
     candidates = section.get("wsl_python_candidates", ["python3", "python"])
     if not isinstance(candidates, list):
         raise ExecutionBackendError("desktop_console.wsl_python_candidates must be a list")
 
-    wsl_script = _wsl_path(script, wsl_executable=wsl, run=run)
-    python = _wsl_python(wsl_executable=wsl, candidates=candidates, run=run)
+    wsl_script = _wsl_path(script, wsl_executable=wsl, distro=distro, run=run)
+    python = _wsl_python(wsl_executable=wsl, distro=distro, candidates=candidates, run=run)
     path_prepend = section.get("wsl_path_prepend", ["~/.local/bin", "~/.cargo/bin"])
     if not isinstance(path_prepend, list):
         raise ExecutionBackendError("desktop_console.wsl_path_prepend must be a list")
     _home, runtime_path = _wsl_environment(
-        wsl_executable=wsl, python=python, path_prepend=path_prepend, run=run
+        wsl_executable=wsl, distro=distro, python=python, path_prepend=path_prepend, run=run
     )
+    target = str(section.get("wsl_target_root", "")).strip()
+    if target.startswith("~/"):
+        target = f"{_home}/{target[2:]}"
+    if target and (not target.startswith("/") or target.startswith("/mnt/")):
+        raise ExecutionBackendError("wsl_target_root must identify a native Linux workspace (absolute path or ~/...).")
+    target_args = ("--target", target) if target else ()
     return LaunchPlan(
         backend="wsl",
-        runtime=f"{python} + user PATH",
+        runtime=f"{distro + ' / ' if distro else ''}{python} + user PATH" + (f" / {target}" if target else ""),
         command=(
-            wsl, "--exec", "/usr/bin/env", f"PATH={runtime_path}",
-            python, wsl_script, "run", selection, "--mode", mode,
+            wsl, *(["-d", distro] if distro else []), "--exec", "/usr/bin/env", f"PATH={runtime_path}",
+            python, wsl_script, *target_args, "run", selection, "--mode", mode,
         ),
     )

@@ -1,1 +1,19 @@
+# Runtime and local diagnostics
 .levelupdiag/
+
+# Python caches/environments
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.pyc
+*.pyo
+
+# Local output
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup

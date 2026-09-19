@@ -22,6 +22,23 @@ class ExecutionBackendTests(unittest.TestCase):
         self.assertEqual(plan.command[0], "/usr/bin/python3")
         self.assertEqual(plan.command[-4:], ("run", "audit-total", "--mode", "debug"))
 
+    def test_koali_system_campaign_forces_native_windows_backend(self):
+        cfg = {
+            "desktop_console": {
+                "execution_backend": "auto",
+                "campaign_backends": {"koali-system": "native"},
+            }
+        }
+        plan = build_launch_plan(
+            Path(r"C:\mycode\kOA-Linux\LevelUpDiag-Koali"),
+            "koali-system", "validation", cfg,
+            platform_name="nt", native_python=r"C:\Python\python.exe",
+            which=lambda _name: None,
+        )
+        self.assertEqual(plan.backend, "native")
+        self.assertEqual(plan.command[0], r"C:\Python\python.exe")
+        self.assertEqual(plan.command[-4:], ("run", "koali-system", "--mode", "validation"))
+
     def test_auto_on_windows_uses_wsl_with_augmented_user_path_without_shell(self):
         calls = []
 

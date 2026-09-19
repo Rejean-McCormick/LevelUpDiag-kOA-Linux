@@ -22,6 +22,31 @@
     "wsl_path_prepend": [
       "~/.local/bin",
       "~/.cargo/bin"
-    ]
+    ],
+    "campaign_backends": {
+      "koali-system": "native",
+      "koali-system-debug": "native",
+      "N12": "native",
+      "store": "native",
+      "N13": "native"
+    },
+    "wsl_distro": "Ubuntu-24.04",
+    "wsl_target_root": "~/work/koa-linux"
+  },
+  "koali_system": {
+    "enabled": true,
+    "root": "../koali-spaces",
+    "shell_url": "http://127.0.0.1:4173",
+    "max_state_age_seconds": 30,
+    "live_http": true
+  },
+  "campaign_targets": {
+    "koali-system": "../koali-spaces",
+    "koali-system-debug": "../koali-spaces",
+    "store": "../koa-linux"
+  },
+  "store": {
+    "root": "../koa-linux",
+    "runtime_checks": false
   }
 }

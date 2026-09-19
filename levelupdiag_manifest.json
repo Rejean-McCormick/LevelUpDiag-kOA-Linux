@@ -3,7 +3,7 @@
   "standard": "LevelUpDiag",
   "standard_version": "1.0.0",
   "suite_name": "LevelUpDiag-Koali",
-  "suite_version": "2.4.1",
+  "suite_version": "2.7.0",
   "repository_mode": "sibling-specialization",
   "control_dir_default": ".levelupdiag",
   "levels": [
@@ -181,9 +181,55 @@
       "timeout_seconds": 300,
       "parallel_safe": false,
       "purpose": "Verify that LevelUpDiag-Koali is absent from a configured delivery target."
+    },
+    {
+      "id": "N12",
+      "name": "Koali Product System",
+      "module": "levels.n12_koali_system",
+      "category": "runtime",
+      "order": 120,
+      "required": true,
+      "depends_on": [
+        "N00"
+      ],
+      "timeout_seconds": 90,
+      "parallel_safe": false,
+      "purpose": "Verify the live Koali product system: linked owner contracts, canonical state projection, required runtime probes, Shell readiness, presentation boundaries, and optional-module isolation."
+    },
+    {
+      "id": "N13",
+      "name": "Store and Third-Party Applications",
+      "module": "levels.n13_store",
+      "category": "runtime",
+      "order": 130,
+      "required": true,
+      "depends_on": [
+        "N00"
+      ],
+      "timeout_seconds": 150,
+      "parallel_safe": false,
+      "purpose": "Check store sources, image projection and optional read-only probes inside the Linux desktop; never install applications."
     }
   ],
   "campaigns": {
+    "koali-system": {
+      "mode": "validation",
+      "scope": "koali_product_system",
+      "description": "Windows-native live Koali Shell and linked products. Store/Linux installation is qualified separately with store.",
+      "levels": [
+        "N00",
+        "N12"
+      ]
+    },
+    "koali-system-debug": {
+      "mode": "debug",
+      "scope": "koali_product_system",
+      "description": "Windows-native live Koali Shell and linked products. Store/Linux installation is qualified separately with store.",
+      "levels": [
+        "N00",
+        "N12"
+      ]
+    },
     "stabilization": {
       "mode": "debug",
       "scope": "koali_core_pre_subsystem",
@@ -441,6 +487,46 @@
         "N01",
         "N11"
       ]
+    },
+    "store": {
+      "mode": "validation",
+      "scope": "third_party_store",
+      "description": "Store source checks and optional Linux session probes; no installations.",
+      "levels": [
+        "N00",
+        "N13"
+      ]
+    },
+    "audit-local": {
+      "mode": "debug",
+      "scope": "linux_local_diagnostic",
+      "runtime_scope": "local",
+      "description": "Independent Linux local diagnostics; no full-system conformance claim.",
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05",
+        "N07",
+        "N08",
+        "N09",
+        "N10"
+      ]
+    },
+    "audit-qemu": {
+      "mode": "debug",
+      "scope": "linux_qemu_diagnostic",
+      "runtime_scope": "qemu",
+      "description": "Independent Linux qemu diagnostics; no full-system conformance claim.",
+      "levels": [
+        "N00",
+        "N01",
+        "N04",
+        "N05",
+        "N08",
+        "N09",
+        "N10"
+      ]
     }
   },
   "qualification_scopes": {
@@ -458,6 +544,26 @@
       "final_profile_unchanged": "sovereign-linux-node",
       "conformance_claimed": false,
       "delivery_qualification_included": false
+    },
+    "koali_product_system": {
+      "purpose": "Qualify the live Koali Spaces composition layer and linked owner runtimes without absorbing application repositories.",
+      "shell_critical_products": [
+        "konnaxion",
+        "orgo",
+        "koa_mediatheque"
+      ],
+      "accepted_optional_runtime_outages": [
+        "semantik_architect"
+      ],
+      "source_only_capabilities": [
+        "kristal_framework",
+        "koa_linux",
+        "koali_control_panel",
+        "koa_digital_ecosystem"
+      ]
+    },
+    "third_party_store": {
+      "purpose": "Source and opt-in Linux session diagnostics. Interactive installation is not certified by this campaign."
     }
   }
 }

@@ -1,5 +1,34 @@
+# LevelUpDiag local runtime state
 .levelupdiag/
 levelupdiag.config.local.json
+
+# Python environments, caches, tests, and coverage
+.venv/
+venv/
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Local logs and temporary/editor output
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# IDE and OS metadata
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
 /GitSink.bat

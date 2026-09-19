@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 
 import shutil
 import subprocess
@@ -49,10 +50,17 @@ def _selection_mode(manifest: dict, selection: str, requested_mode: str | None, 
 def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=None, fail_fast=None, mode=None):
     manifest = load_manifest(tool_root)
     cfg = load_config(tool_root, target_override)
+    if target_override is None:
+        campaign_targets = cfg.get("campaign_targets", {})
+        if isinstance(campaign_targets, dict):
+            campaign_target = campaign_targets.get(selection)
+            if isinstance(campaign_target, str) and campaign_target.strip():
+                cfg = load_config(tool_root, campaign_target)
     effective_mode = _selection_mode(manifest, selection, mode, cfg)
     policy = policy_for(cfg, effective_mode)
     cfg["_mode"] = effective_mode
     campaign_meta = manifest.get("campaigns", {}).get(selection, {}) if isinstance(manifest.get("campaigns", {}), dict) else {}
+    runtime_scope = "all" if effective_mode == "release" else campaign_meta.get("runtime_scope", "all")
     qualification_scope = str(campaign_meta.get("scope", "ad_hoc" if selection not in manifest.get("campaigns", {}) else "full_target"))
     deferred_subsystems = [str(x) for x in campaign_meta.get("deferred_subsystems", []) if str(x)] if isinstance(campaign_meta, dict) else []
     qualification_cfg = cfg.get("qualification", {}) if isinstance(cfg.get("qualification", {}), dict) else {}
@@ -70,6 +78,7 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
     started = utc_now()
     effective_config = {k:v for k,v in cfg.items() if not k.startswith("_")}
     effective_config["diagnostic_mode"] = effective_mode
+    effective_config["runtime_scope"] = runtime_scope
     write_json(run_root / "effective_config.json", effective_config)
 
     protect = policy["protect_tracked_files"]
@@ -98,7 +107,7 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
         started_mono = time.monotonic()
         try:
             cp = subprocess.run(
-                cmd, cwd=str(target), stdin=subprocess.DEVNULL,
+                cmd, cwd=str(target), env={**os.environ, "KOA_TEST_SCOPE": runtime_scope}, stdin=subprocess.DEVNULL,
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
                 encoding="utf-8", errors="replace", timeout=timeout,
                 shell=False, check=False,

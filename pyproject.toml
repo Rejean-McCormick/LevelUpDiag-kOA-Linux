@@ -1,10 +1,10 @@
 [project]
 name = "levelupdiag-koali"
-version = "2.4.1"
-description = "Core-stabilization-first LevelUpDiag specialization for kOA-Linux"
+version = "2.7.0"
+description = "Koali product-system diagnostics with legacy kOA-Linux stabilization campaigns"
 requires-python = ">=3.10"
 dependencies = []
 
 [tool.levelupdiag]
 mode = "copy-in-koali-specialization"
-sequence = "N00-N11-serial"
+sequence = "N00-N13-serial"

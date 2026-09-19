@@ -22,7 +22,7 @@ TOOL_ROOT = Path(__file__).resolve().parent
 class LevelUpDiagConsole(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("LevelUpDiag-Koali 2.4.1 — WSL-aware Total Audit")
+        self.title("LevelUpDiag-Koali 2.7.0 — Koali Product System")
         self.minsize(900, 720)
         self.geometry("1040x820")
 
@@ -45,7 +45,7 @@ class LevelUpDiagConsole(tk.Tk):
         header = ttk.Frame(outer)
         header.pack(fill="x")
         ttk.Label(header, text="LevelUpDiag-Koali", font=("Segoe UI", 14, "bold")).pack(side="left")
-        self.status_var = tk.StringVar(value="Prêt — STABILISATION KOALI")
+        self.status_var = tk.StringVar(value="Prêt — KOALI SYSTEM")
         right_header = ttk.Frame(header)
         right_header.pack(side="right")
         ttk.Label(right_header, textvariable=self.status_var).pack(anchor="e")
@@ -54,9 +54,9 @@ class LevelUpDiagConsole(tk.Tk):
         ttk.Label(
             outer,
             text=(
-                "STABILISATION KOALI vérifie d'abord l'environnement, les contrats et les composants natifs. "
-                "Konnaxion reste placeholder; Ariane, Orgo et Semantik Architect sont différés jusqu'à l'intégration explicite. "
-                "Le profil souverain final reste strict et n'est pas affaibli."
+                "KOALI SYSTEM vérifie le système produit réellement lancé: projection du Shell, owner contracts liés, "
+                "Konnaxion, Orgo et Médiathèque critiques, et isolation correcte des modules optionnels. "
+                "SemantiK Architect reste visible mais son indisponibilité runtime actuelle est explicitement acceptée."
             ),
             wraplength=980,
         ).pack(anchor="w", pady=(4, 10))
@@ -72,12 +72,16 @@ class LevelUpDiagConsole(tk.Tk):
 
         presets = ttk.Frame(outer)
         presets.pack(fill="x", pady=(0, 8))
-        ttk.Button(presets, text="STABILISATION KOALI", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=(0, 5))
-        ttk.Button(presets, text="RUNTIME CORE", command=lambda: self._select_campaign("stabilization-runtime", "debug")).pack(side="left", padx=5)
-        ttk.Button(presets, text="DEBUG COMPLET", command=lambda: self._select_campaign("debug", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="KOALI SYSTEM", command=lambda: self._select_campaign("koali-system", "validation")).pack(side="left", padx=(0, 5))
+        ttk.Button(presets, text="STORE", command=lambda: self._select_campaign("store", "validation")).pack(side="left", padx=5)
+        ttk.Button(presets, text="KOALI DEBUG", command=lambda: self._select_campaign("koali-system-debug", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="STABILISATION kOA", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="AUDIT TOTAL", command=lambda: self._select_campaign("audit-total", "debug")).pack(side="left", padx=5)
-        ttk.Button(presets, text="STRUCTURE", command=lambda: self._select_campaign("structure", "validation")).pack(side="left", padx=5)
-        ttk.Button(presets, text="VALIDATION", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=5)
+        runtime_presets = ttk.Frame(outer)
+        runtime_presets.pack(fill="x", padx=12, pady=3)
+        ttk.Button(runtime_presets, text="AUDIT SANS VM", command=lambda: self._select_campaign("audit-local", "debug")).pack(side="left", padx=5)
+        ttk.Button(runtime_presets, text="AUDIT QEMU", command=lambda: self._select_campaign("audit-qemu", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="VALIDATION kOA", command=lambda: self._select_campaign("validation", "validation")).pack(side="left", padx=5)
         ttk.Button(presets, text="RELEASE", command=lambda: self._select_campaign("release", "release")).pack(side="left", padx=5)
 
         self.level_frame = ttk.LabelFrame(outer, text="Niveaux")
@@ -131,10 +135,11 @@ class LevelUpDiagConsole(tk.Tk):
 
         self.level_frame.columnconfigure(0, weight=1)
         self.level_frame.columnconfigure(1, weight=1)
-        self._select_campaign("debug", "debug")
+        self._select_campaign("koali-system", "validation")
         self._refresh_latest_log_path()
 
     def _select_campaign(self, campaign: str, mode: str) -> None:
+        self.selected_campaign = campaign
         wanted = set(self.manifest.get("campaigns", {}).get(campaign, {}).get("levels", []))
         for lid, var in self.level_vars.items():
             var.set(lid in wanted)
@@ -154,9 +159,9 @@ class LevelUpDiagConsole(tk.Tk):
     def _mode_changed(self) -> None:
         mode = self.mode_var.get()
         if mode == "debug":
-            text = "DEBUG/STABILISATION: les blockers restent locaux. Le scope core ne prétend pas qualifier les sous-systèmes différés ni le profil souverain final."
+            text = "DEBUG: les anomalies restent visibles sans bloquer toute la campagne. KOALI DEBUG utilise le backend Windows natif pour observer le Shell réellement lancé."
         elif mode == "validation":
-            text = "VALIDATION: les erreurs de configuration/infrastructure et BLOCKED peuvent bloquer leurs dépendants; Git propre n'est pas imposé globalement."
+            text = "VALIDATION: KOALI SYSTEM exige que le Shell et les produits critiques soient prêts; SemantiK peut rester indisponible car il est explicitement optionnel."
         else:
             text = "RELEASE: politique stricte avec protection de l'état Git suivi et dépendances bloquantes."
         self.policy_var.set(text)
@@ -173,7 +178,7 @@ class LevelUpDiagConsole(tk.Tk):
 
     def _campaign_for_selected(self, selected: list[str], mode: str) -> str | None:
         wanted = set(selected)
-        preferred = ("stabilization", "stabilization-runtime", "debug", "audit-total", "structure", "validation", "release")
+        preferred = (getattr(self, "selected_campaign", ""), "audit-local", "audit-qemu", "koali-system", "koali-system-debug", "store", "stabilization", "stabilization-runtime", "debug", "audit-total", "structure", "validation", "release")
         campaigns = self.manifest.get("campaigns", {})
         for name in preferred:
             meta = campaigns.get(name, {})
@@ -203,6 +208,8 @@ class LevelUpDiagConsole(tk.Tk):
             messagebox.showerror("LevelUpDiag", f"Backend d'exécution indisponible:\n{exc}")
             return
 
+        self.active_plan = plan
+        self.last_report_folder = None
         command = list(plan.command)
         self.backend_var.set(f"Backend: {plan.label}")
         self._append(f"\n[{plan.label}]\n$ {' '.join(command)}\n")
@@ -277,6 +284,16 @@ class LevelUpDiagConsole(tk.Tk):
         self.console.configure(state="disabled")
 
     def _append(self, text: str) -> None:
+        for line in text.splitlines():
+            if line.startswith("Report: "):
+                raw = line.removeprefix("Report: ").strip()
+                plan = getattr(self, "active_plan", None)
+                if os.name == "nt" and plan and plan.backend == "wsl" and raw.startswith("/"):
+                    argv = plan.command
+                    if "-d" in argv:
+                        distro = argv[argv.index("-d") + 1]
+                        raw = "//wsl.localhost/" + distro + raw
+                self.last_report_folder = Path(raw).parent
         self.console.configure(state="normal")
         self.console.insert("end", text)
         self.console.see("end")
@@ -287,6 +304,9 @@ class LevelUpDiagConsole(tk.Tk):
         return Path(cfg["_control_root"])
 
     def _latest_run_folder(self) -> Path | None:
+        recent = getattr(self, "last_report_folder", None)
+        if recent is not None:
+            return recent
         try:
             control = self._control_root()
             latest_summary = control / "latest" / "summary.json"

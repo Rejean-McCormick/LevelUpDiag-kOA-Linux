@@ -5,7 +5,7 @@ from pathlib import Path
 from levelupdiag_core.manifest import load_manifest
 from levelupdiag_core.modes import VALID_MODES
 
-EXPECTED = [f"N{i:02d}" for i in range(12)]
+EXPECTED = [f"N{i:02d}" for i in range(14)]
 REQUIRED_COMMANDS = {"docs", "contracts", "components", "integrations", "security", "offline", "system"}
 
 
@@ -17,7 +17,7 @@ def run(cfg, report):
     manifest = load_manifest(tool)
     ordered = [x["id"] for x in sorted(manifest["levels"], key=lambda x:(x.get("order",0),x["id"]))]
     report.add("koali.sequence.manifest", "PASS" if ordered == EXPECTED else "CONFIG_ERROR", "diagnostics",
-               "Koali diagnostic sequence is intact." if ordered == EXPECTED else "Koali diagnostic sequence differs from the expected N00-N11 order.", evidence=ordered)
+               "Koali diagnostic sequence is intact." if ordered == EXPECTED else "Koali diagnostic sequence differs from the expected N00-N13 order.", evidence=ordered)
     parallel = [x["id"] for x in manifest["levels"] if x.get("parallel_safe", True)]
     report.add("koali.sequence.serial", "PASS" if not parallel else "CONFIG_ERROR", "diagnostics",
                "All Koali levels are forced to serial execution." if not parallel else "One or more Koali levels permit parallel execution.", evidence=parallel or {"serial":True})
@@ -36,6 +36,14 @@ def run(cfg, report):
     formal = sorted(debug_levels & {"N02", "N03", "N11"})
     report.add("diagnostics.debug.decoupled", "PASS" if not formal else "CONFIG_ERROR", "diagnostics",
                "Primary DEBUG is decoupled from repository/documentation/release formalities." if not formal else "Primary DEBUG still selects formal conformance levels.", evidence=formal or sorted(debug_levels))
+    koali_system = cfg.get("koali_system", {})
+    system_ok = isinstance(koali_system, dict) and bool(koali_system.get("root")) and isinstance(koali_system.get("expected_products"), list)
+    report.add("diagnostics.koali_system.config", "PASS" if system_ok else "CONFIG_ERROR", "configuration",
+               "Live Koali system diagnostic configuration is present." if system_ok else "Live Koali system diagnostic configuration is missing or invalid.")
+    store = cfg.get("store", {})
+    store_ok = isinstance(store, dict) and isinstance(store.get("root"), str) and bool(store.get("root")) and isinstance(store.get("runtime_checks"), bool)
+    report.add("diagnostics.store.config", "PASS" if store_ok else "CONFIG_ERROR", "configuration",
+               "Store source/session diagnostic configuration is valid." if store_ok else "Store diagnostic configuration is missing or invalid.")
     schema_dir = tool / "schemas"
     absent = [p.name for p in (schema_dir/"report.schema.json", schema_dir/"campaign-summary.schema.json") if not p.exists()]
     report.add("diagnostics.schemas.present", "PASS" if not absent else "CONFIG_ERROR", "diagnostics",

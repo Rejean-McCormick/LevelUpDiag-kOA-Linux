@@ -1,20 +1,33 @@
-# LevelUpDiag-Koali v2.4
+# LevelUpDiag-Koali v2.5
 
-LevelUpDiag-Koali 2.3 is a **core-stabilization-first** diagnostic suite for kOA-Linux. The primary development objective is to stabilize the Koali environment and native core before independent subsystems are integrated.
+LevelUpDiag-Koali 2.5 is the diagnostic suite for the **live Koali product system**, while preserving the historical kOA-Linux stabilization and release campaigns.
 
-Its primary rules are:
+Its primary default is now `koali-system`: it observes the Koali shell that is actually running on the Windows host, reads the canonical `.koali-dev/state` projection, validates linked owner contracts without copying application repositories, independently probes required runtimes, and verifies that optional modules do not incorrectly degrade the global Shell.
 
-> If a formality does not materially prevent observation or execution of the system, it must not block DEBUG.
->
-> Missing independent subsystems must not be falsified as admitted dependencies merely to advance core stabilization.
+Current KS4.4 product policy:
 
-Repository cleanliness, frozen architecture conformance, documentation conformance, delivery residue, signatures, and release provenance remain available as validation/finalization evidence, but they are no longer prerequisites for the main debug path.
+```text
+Konnaxion          shell-critical / must be ready
+Orgo               shell-critical / must be ready
+Médiathèque kOA    shell-critical / must be ready
+SemantiK Architect linked + projected / runtime outage currently accepted
+Kristal / kOA Linux / Control Panel / Digital Ecosystem   source-only
+```
+
+Run it after starting Koali with `RUN_KOALI.cmd`:
+
+```powershell
+python levelupdiag.py run koali-system
+# or
+RUN_KOALI_SYSTEM_DIAG.cmd
+```
+
+The desktop console automatically uses **native Windows Python** for `koali-system`, because it must inspect the Windows-hosted Koali process/state and loopback endpoints. Legacy kOA-Linux campaigns keep the existing WSL-aware backend policy.
 
 
+## Legacy kOA core stabilization scope
 
-## Koali core stabilization scope
-
-The default campaign is now `stabilization`:
+The legacy core campaign remains `stabilization`:
 
 ```text
 N00 Diagnostic Integrity
@@ -97,7 +110,7 @@ Linux/macOS launcher default:
 ./RUN_LEVELUPDIAG.sh
 ```
 
-Both now default to the `stabilization` campaign.
+Both now default to the `koali-system` campaign.
 
 ## Console
 
@@ -109,13 +122,12 @@ Both now default to the `stabilization` campaign.
 
 Presets:
 
-- **STABILISATION KOALI**: N00, N01, N04, N05
-- **RUNTIME CORE**: N00, N01, N04, N05, N08, N09, N10
-- **DEBUG COMPLET**: N00, N01, N04-N10
-- **AUDIT TOTAL**: N00-N10 in DEBUG non-blocking mode, one-pass complete diagnostic evidence without a conformance or delivery claim
-- **STRUCTURE**: N00-N03
-- **VALIDATION**: N00-N10
-- **RELEASE**: N00-N11
+- **KOALI SYSTEM**: N00 + N12, strict live product-system validation.
+- **KOALI DEBUG**: N00 + N12, same evidence with non-blocking DEBUG aggregation.
+- **STABILISATION kOA**: N00, N01, N04, N05.
+- **AUDIT TOTAL**: legacy N00-N10 in DEBUG non-blocking mode.
+- **VALIDATION kOA**: legacy N00-N10.
+- **RELEASE**: legacy N00-N11.
 
 N02 Repository and N03 Documentation are intentionally absent from DEBUG PRINCIPAL.
 
@@ -134,6 +146,7 @@ N08 Security Runtime
 N09 Offline Runtime
 N10 System Runtime
 N11 Delivery
+N12 Koali Product System
 ```
 
 All levels remain serial for stable evidence ordering.
@@ -142,6 +155,8 @@ Functional levels no longer depend transitively on N02. Selecting `N08,N09,N10` 
 
 ## Campaigns
 
+- `koali-system` — default live Koali qualification, N00 + N12 in VALIDATION mode.
+- `koali-system-debug` — non-blocking live Koali diagnosis, N00 + N12 in DEBUG mode.
 - `stabilization` — primary pre-subsystem Koali core stabilization, mode DEBUG.
 - `stabilization-runtime` — core runtime qualification when image/QEMU context exists, mode DEBUG.
 - `debug` — broader development diagnosis including integration/profile/runtime levels, mode DEBUG.
@@ -252,6 +267,12 @@ Evidence remains under the target repository:
 
 Commands use `shell=false`; output is bounded and redacted; target mutation remains disabled by configuration.
 
+## Version 2.5.0
+
+2.5.0 adds N12 **Koali Product System**. It validates the KS4.x multi-repository composition layer from its canonical runtime evidence instead of treating integrated applications as copied dependencies. N12 checks live state freshness, owner-contract discovery, runtime readiness, surface registrations, active Space projection, Shell-critical versus optional health semantics, public `/api/shell-state` privacy, and independent loopback probes. SemantiK Architect may remain unavailable without failing Koali while its catalog entry has `affectsShellState=false`.
+
+The `koali-system` desktop campaign is forced to the native Windows backend; legacy kOA-Linux campaigns retain WSL-aware execution.
+
 ## Version 2.4.1
 
 2.4.1 fixes the WSL environment inherited by the Windows desktop console. A direct `wsl.exe --exec` launch can expose a narrower `PATH` than an interactive WSL session, which made user-installed `uv`, Cargo, Rust and rustup disappear even though the run was correctly executing under WSL.
@@ -271,3 +292,44 @@ It also fixes the desktop console's **DEBUG COMPLET** preset so it selects the `
 ## Version 2.2.0
 
 2.2.0 changed the default workflow from broad debug to explicit **Koali core stabilization before subsystem integration**. It also requires the core Rust/native toolchain in N01 (`git`, `cargo`, `rustc`, `cc`), adds qualification-scope metadata to campaign summaries, and provides compatibility aliases plus `scripts/run_level.py` for older Koali Control Panel integrations.
+
+## 2.6 — Store coverage and honest partial results
+
+In version 2.6, `koali-system` ran N00 + N12 + N13. Version 2.7 separates the Store again. The **STORE** button
+and `python levelupdiag.py run store` run N00 + N13 independently. N13 targets
+`../koa-linux`, not the Spaces repository. Linux session probes are opt-in with
+`store.runtime_checks=true`; Windows source checks do not certify the Linux store.
+No packages are installed by this diagnostic. See [N13 setup and VM acceptance](docs/STORE_TESTS.md).
+
+N12 reports accepted optional outages as WARN, disabled/missing live checks as
+PARTIAL, and refuses redirects away from loopback. HTTP proxy environment variables
+are ignored for local probes. Version 2.7 restores the Windows-only N00 + N12 campaign.
+
+
+## Version 2.7 — Independent diagnostic scopes
+
+The console now provides **AUDIT SANS VM** (`audit-local`) and **AUDIT QEMU**
+(`audit-qemu`). Select the preset, then **LANCER SÉLECTION**. **AUDIT TOTAL**
+keeps both scopes and documentation: missing VM prerequisites remain visible,
+while available local tests still execute. **KOALI SYSTEM** remains native Windows,
+N00 + N12. **STORE** remains an independent N00 + N13 campaign; its PARTIAL result
+honestly means no end-to-end installation has been validated.
+
+WSL probes and launches explicitly select `desktop_console.wsl_distro`
+(default `Ubuntu-24.04`) and pass `--target` from `wsl_target_root`
+(default `~/work/koa-linux`). On Rejean's configured distro this expands to
+`/home/rejean/work/koa-linux`. The execution banner shows the distro and target.
+The log button follows the report emitted by the completed run, including WSL paths.
+
+Install this update together with the kOA-Linux gate-scope update. Use the Control
+Panel's development preparation to refresh the imported Linux workspace after
+copying the updated sources. Preserve existing `levelupdiag.config.local.json`;
+check that it does not override `commands.offline` or `commands.system` with empty
+arrays, or override the WSL distro/workspace with stale values.
+
+`audit-local` covers configured source tests, including Store source tests in N10.
+It does not validate a running Linux desktop. `audit-qemu` retains its prerequisite
+levels and selects VM tests in N08–N10. RELEASE always selects the full runtime
+scope. Scope and omitted commands are recorded in kOA gate reports.
+
+See `UPDATE_20260919.md` for verification results and remaining image prerequisites.

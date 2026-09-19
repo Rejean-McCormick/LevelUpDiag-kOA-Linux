@@ -125,9 +125,9 @@
       "campaign_policy": "release"
     }
   },
-  "default_campaign": "stabilization",
+  "default_campaign": "koali-system",
   "qualification": {
-    "default_scope": "koali_core_pre_subsystem",
+    "default_scope": "koali_product_system",
     "final_profile": "sovereign-linux-node",
     "deferred_subsystems": {
       "konnaxion": "placeholder_until_integration",
@@ -150,6 +150,71 @@
     "wsl_path_prepend": [
       "~/.local/bin",
       "~/.cargo/bin"
+    ],
+    "campaign_backends": {
+      "koali-system": "native",
+      "koali-system-debug": "native",
+      "N12": "native",
+      "store": "native",
+      "N13": "native"
+    },
+    "wsl_distro": "Ubuntu-24.04",
+    "wsl_target_root": "~/work/koa-linux"
+  },
+  "koali_system": {
+    "enabled": true,
+    "root": "../koali-spaces",
+    "state_dir": ".koali-dev/state",
+    "shell_url": "http://127.0.0.1:4173",
+    "shell_state_endpoint": "/api/shell-state",
+    "max_state_age_seconds": 30,
+    "probe_timeout_seconds": 3,
+    "live_http": true,
+    "expected_network_state": "online",
+    "launcher_markers": [
+      "RUN_KOALI.cmd",
+      "KOALI.pyw"
+    ],
+    "expected_products": [
+      {
+        "id": "konnaxion",
+        "module_id": "konnaxion",
+        "shell_critical": true,
+        "allow_unready": false
+      },
+      {
+        "id": "orgo",
+        "module_id": "orgo",
+        "shell_critical": true,
+        "allow_unready": false
+      },
+      {
+        "id": "semantik_architect",
+        "module_id": "semantik_architect",
+        "shell_critical": false,
+        "allow_unready": true
+      },
+      {
+        "id": "koa_mediatheque",
+        "module_id": "koa_mediatheque",
+        "shell_critical": true,
+        "allow_unready": false
+      }
+    ],
+    "expected_sources": [
+      "kristal_framework",
+      "koa_linux",
+      "koali_control_panel",
+      "koa_digital_ecosystem"
     ]
+  },
+  "campaign_targets": {
+    "koali-system": "../koali-spaces",
+    "koali-system-debug": "../koali-spaces",
+    "store": "../koa-linux"
+  },
+  "store": {
+    "root": "../koa-linux",
+    "runtime_checks": false
   }
 }

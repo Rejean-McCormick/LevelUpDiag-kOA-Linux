@@ -1,40 +1,49 @@
-# Koali sequence — LevelUpDiag 2.2
+# Koali sequence — LevelUpDiag 2.5
 
-## Phase 1: stabilize Koali core
+## Primary path: live Koali product system
 
-Run `stabilization` first. It validates diagnostic integrity, the complete host/build environment, canonical contracts, and native component validations. Independent subsystems are intentionally deferred and must not be marked pinned or activable unless their real source authority has been integrated and verified.
+Start Koali with its managed launcher, wait for the Shell to become available, then run:
 
 ```text
-PREPARE DEVELOPMENT ENVIRONMENT
-→ LevelUpDiag stabilization
-→ build/verify native Koali components
-→ repeat until the environment is stable
+RUN_KOALI.cmd
+→ LevelUpDiag koali-system
+→ N00 Diagnostic Integrity
+→ N12 Koali Product System
+→ N13 Store and Third-Party Applications
 ```
 
-Deferred during this phase:
+N12 consumes the runtime evidence produced by Koali itself:
 
-- Konnaxion: placeholder until real integration.
-- Ariane: integrate and test next.
-- Orgo: draft/not admitted.
-- Semantik Architect: deferred/not admitted.
+```text
+.koali-dev/state/ecosystem-status.json
+.koali-dev/state/surface-runtime.json
+.koali-dev/state/active-state.json
+        ↓
+owner contracts + surface projection + module health
+        ↓
+/api/shell-state + independent loopback probes
+```
 
-## Phase 2: core runtime
+The expected KS4.4 policy is:
 
-When a bootable image exists, run `stabilization-runtime`. N08/N09/N10 remain diagnostic in DEBUG; final-profile blockers remain visible but do not redefine the core-stabilization scope.
+- Konnaxion, Orgo and Médiathèque kOA are Shell-critical and must be ready.
+- SemantiK Architect remains linked/projected but its current runtime outage is accepted and must not degrade the global Shell.
+- Kristal, kOA Linux, Koali Control Panel and kOA Digital Ecosystem remain source-only discoveries.
+- Koali must not expose repository paths, commands, PIDs or other orchestration-private fields through the public Shell state.
+- Hosted applications keep their own internal navigation; Koali must not recreate a redundant product sidebar.
 
-## Phase 3: subsystem integration
+## Legacy path: kOA core stabilization
 
-Integrate each independent subsystem with real source pins, digests, license/documentation evidence, adapter tests, and activation evidence.
+The historical campaigns remain available unchanged for the underlying kOA-Linux target:
 
-For products that expose a UI, preserve the Koali modularity boundary during this phase:
+```text
+stabilization
+stabilization-runtime
+audit-total
+validation
+release
+```
 
-- standalone product operation remains product-owned;
-- integrated UI contributions are declared explicitly rather than copied into another product;
-- optional product removal is a supported state;
-- private cross-product UI imports are not used as a substitute for shared Koali UI primitives or public integration contracts.
+These continue to use N01-N11 and the WSL/native toolchain rules documented by the kOA-Linux qualification flow.
 
-N06 can diagnose these properties only when their concrete markers and dependency scan inputs are configured locally. It does not define the UI contract itself.
-
-## Phase 4: final target
-
-Use `validation` and `release` against the unchanged canonical `sovereign-linux-node` target. No partial conformance is claimed.
+N13 checks koa-linux store sources by default; Linux session checks are opt-in. See [Store tests](STORE_TESTS.md).
