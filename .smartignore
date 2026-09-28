@@ -1,17 +1,24 @@
 # Runtime and local diagnostics
 .levelupdiag/
 
-# Python caches/environments
+# Python environments/caches and generated test output
 .venv/
 venv/
 __pycache__/
 .pytest_cache/
+.pytest-tmp/
 .mypy_cache/
 .ruff_cache/
 *.pyc
 *.pyo
+.coverage
+.coverage.*
+htmlcov/
 
-# Local output
+# Snapshot bookkeeping retained in Git
+/CODE_SNAPSHOT_MANIFEST.md
+
+# Local/generated output
 *.log
 *.tmp
 *.temp
