@@ -138,12 +138,26 @@ def _expected_products(section: dict) -> list[dict]:
     return [item for item in products if isinstance(item, dict) and item.get("id")]
 
 
-def _product_policy(item: dict) -> tuple[str, str, bool, bool]:
+def _product_policy(item: dict) -> tuple[str, str, bool, bool, bool]:
     product_id = str(item.get("id"))
     module_id = str(item.get("module_id") or product_id)
     shell_critical = bool(item.get("shell_critical", True))
     allow_unready = bool(item.get("allow_unready", False))
-    return product_id, module_id, shell_critical, allow_unready
+    presentation = bool(item.get("presentation", True))
+    return product_id, module_id, shell_critical, allow_unready, presentation
+
+
+def _expected_sources(section: dict) -> list[dict]:
+    values = section.get("expected_sources", [])
+    if not isinstance(values, list):
+        return []
+    result: list[dict] = []
+    for value in values:
+        if isinstance(value, str) and value:
+            result.append({"id": value, "required": True})
+        elif isinstance(value, dict) and value.get("id"):
+            result.append(dict(value))
+    return result
 
 
 def _by(items: Any, key: str) -> dict[str, dict]:
@@ -223,7 +237,7 @@ def evaluate_loaded_state(
     metrics["projected_modules"] = _module_ids(active)
 
     for item in expected:
-        product_id, module_id, shell_critical, allow_unready = _product_policy(item)
+        product_id, module_id, shell_critical, allow_unready, presentation = _product_policy(item)
         product = discovered.get(product_id)
         if product is None:
             findings.append(_finding(
@@ -281,81 +295,101 @@ def evaluate_loaded_state(
             recommendation=None if accepted else "Inspect the owner runtime probes and process state in ecosystem-status.json.",
         ))
 
-        registration_ok = module_id in registrations
-        target = targets.get(module_id)
-        target_ok = isinstance(target, dict) and isinstance(target.get("embedBase"), str) and _loopback_url(str(target.get("embedBase")))
-        findings.append(_finding(
-            f"n12.product.{product_id}.surface",
-            "PASS" if registration_ok and target_ok else "FAIL",
-            "presentation",
-            f"Koali surface registration for '{product_id}' is coherent."
-            if registration_ok and target_ok
-            else f"Koali surface registration for '{product_id}' is incomplete.",
-            evidence={"runtime_registration": registration_ok, "resolved_target": target},
-        ))
-
-        manifest = modules.get(module_id)
-        if not isinstance(manifest, dict):
+        if presentation:
+            registration_ok = module_id in registrations
+            target = targets.get(module_id)
+            target_ok = isinstance(target, dict) and isinstance(target.get("embedBase"), str) and _loopback_url(str(target.get("embedBase")))
             findings.append(_finding(
-                f"n12.product.{product_id}.projection", "FAIL", "presentation",
-                f"Module '{module_id}' is missing from active-state.json.",
-            ))
-        else:
-            routes = manifest.get("routes", [])
-            sidebar_items = (manifest.get("sidebar") or {}).get("items", []) if isinstance(manifest.get("sidebar"), dict) else None
-            portability = manifest.get("ui_portability", {}) if isinstance(manifest.get("ui_portability"), dict) else {}
-            boundary = manifest.get("authority_boundary", {}) if isinstance(manifest.get("authority_boundary"), dict) else {}
-            projection_ok = (
-                isinstance(routes, list) and len(routes) >= 1
-                and sidebar_items == []
-                and portability.get("integrated_supported") is True
-                and portability.get("standalone_supported") is True
-                and boundary.get("presentation_only") is True
-                and boundary.get("may_grant_capabilities") is False
-                and boundary.get("direct_domain_writes") is False
-            )
-            findings.append(_finding(
-                f"n12.product.{product_id}.projection",
-                "PASS" if projection_ok else "FAIL",
+                f"n12.product.{product_id}.surface",
+                "PASS" if registration_ok and target_ok else "FAIL",
                 "presentation",
-                f"Module '{module_id}' preserves the owner-UI boundary."
-                if projection_ok
-                else f"Module '{module_id}' does not match the expected owner-UI projection boundary.",
-                evidence={
-                    "routes": len(routes) if isinstance(routes, list) else None,
-                    "sidebar_items": sidebar_items,
-                    "ui_portability": portability,
-                    "authority_boundary": boundary,
-                },
+                f"Koali surface registration for '{product_id}' is coherent."
+                if registration_ok and target_ok
+                else f"Koali surface registration for '{product_id}' is incomplete.",
+                evidence={"runtime_registration": registration_ok, "resolved_target": target},
             ))
 
-        item_health = health.get(module_id)
-        if not isinstance(item_health, dict):
-            findings.append(_finding(
-                f"n12.product.{product_id}.module_health", "FAIL", "presentation",
-                f"Module health for '{module_id}' is not projected.",
-            ))
+            manifest = modules.get(module_id)
+            if not isinstance(manifest, dict):
+                findings.append(_finding(
+                    f"n12.product.{product_id}.projection", "FAIL", "presentation",
+                    f"Module '{module_id}' is missing from active-state.json.",
+                ))
+            else:
+                routes = manifest.get("routes", [])
+                sidebar_items = (manifest.get("sidebar") or {}).get("items", []) if isinstance(manifest.get("sidebar"), dict) else None
+                portability = manifest.get("ui_portability", {}) if isinstance(manifest.get("ui_portability"), dict) else {}
+                boundary = manifest.get("authority_boundary", {}) if isinstance(manifest.get("authority_boundary"), dict) else {}
+                projection_ok = (
+                    isinstance(routes, list) and len(routes) >= 1
+                    and sidebar_items == []
+                    and portability.get("integrated_supported") is True
+                    and portability.get("standalone_supported") is True
+                    and boundary.get("presentation_only") is True
+                    and boundary.get("may_grant_capabilities") is False
+                    and boundary.get("direct_domain_writes") is False
+                )
+                findings.append(_finding(
+                    f"n12.product.{product_id}.projection",
+                    "PASS" if projection_ok else "FAIL",
+                    "presentation",
+                    f"Module '{module_id}' preserves the owner-UI boundary."
+                    if projection_ok
+                    else f"Module '{module_id}' does not match the expected owner-UI projection boundary.",
+                    evidence={
+                        "routes": len(routes) if isinstance(routes, list) else None,
+                        "sidebar_items": sidebar_items,
+                        "ui_portability": portability,
+                        "authority_boundary": boundary,
+                    },
+                ))
+
+            item_health = health.get(module_id)
+            if not isinstance(item_health, dict):
+                findings.append(_finding(
+                    f"n12.product.{product_id}.module_health", "FAIL", "presentation",
+                    f"Module health for '{module_id}' is not projected.",
+                ))
+            else:
+                affects = item_health.get("affects_shell_state") is True
+                semantics_ok = affects == shell_critical
+                health_state = str(item_health.get("state") or "unknown")
+                ready_ok = health_state == "ready" or allow_unready
+                findings.append(_finding(
+                    f"n12.product.{product_id}.module_health",
+                    "PASS" if semantics_ok and ready_ok else "FAIL",
+                    "presentation",
+                    f"Module health semantics for '{module_id}' are correct."
+                    if semantics_ok and ready_ok
+                    else f"Module health semantics for '{module_id}' are inconsistent.",
+                    evidence={
+                        "state": health_state,
+                        "affects_shell_state": item_health.get("affects_shell_state"),
+                        "expected_shell_critical": shell_critical,
+                        "allow_unready": allow_unready,
+                    },
+                ))
         else:
-            affects = item_health.get("affects_shell_state") is True
-            semantics_ok = affects == shell_critical
-            health_state = str(item_health.get("state") or "unknown")
-            ready_ok = health_state == "ready" or allow_unready
+            absent_from_surface = module_id not in registrations and module_id not in targets
             findings.append(_finding(
-                f"n12.product.{product_id}.module_health",
-                "PASS" if semantics_ok and ready_ok else "FAIL",
+                f"n12.product.{product_id}.headless_surface",
+                "PASS" if absent_from_surface else "FAIL",
                 "presentation",
-                f"Module health semantics for '{module_id}' are correct."
-                if semantics_ok and ready_ok
-                else f"Module health semantics for '{module_id}' are inconsistent.",
-                evidence={
-                    "state": health_state,
-                    "affects_shell_state": item_health.get("affects_shell_state"),
-                    "expected_shell_critical": shell_critical,
-                    "allow_unready": allow_unready,
-                },
+                f"Headless product '{product_id}' is correctly absent from the Koali iframe/surface registry."
+                if absent_from_surface else f"Headless product '{product_id}' was incorrectly projected as a Koali web surface.",
+                evidence={"runtime_registration_present": module_id in registrations, "resolved_target_present": module_id in targets},
+            ))
+            absent_from_projection = module_id not in modules and module_id not in health
+            findings.append(_finding(
+                f"n12.product.{product_id}.headless_projection",
+                "PASS" if absent_from_projection else "FAIL",
+                "presentation",
+                f"Headless product '{product_id}' remains a capability/runtime and is not exposed as a fake module UI."
+                if absent_from_projection else f"Headless product '{product_id}' is incorrectly present in the active UI projection.",
+                evidence={"module_present": module_id in modules, "module_health_present": module_id in health},
             ))
 
-    required_modules = {"space_home", *[str(item.get("module_id") or item["id"]) for item in expected]}
+    required_modules = {"space_home", *[str(item.get("module_id") or item["id"]) for item in expected if bool(item.get("presentation", True))]}
     projected = set(_module_ids(active))
     missing_modules = sorted(required_modules - projected)
     findings.append(_finding(
@@ -385,7 +419,7 @@ def evaluate_loaded_state(
             "reason": active.get("reason"),
             "expected_network_state": expected_network,
         },
-        recommendation=None if shell_ready and network_ok and reason_ok else "Inspect shell-critical module health; optional SemantiK degradation must not degrade the whole shell.",
+        recommendation=None if shell_ready and network_ok and reason_ok else "Inspect shell-critical presentation-product health and required runtime readiness in ecosystem-status.json.",
     ))
 
     return findings, metrics
@@ -473,18 +507,35 @@ def collect_koali_system_findings(
     findings.extend(state_findings)
     metrics.update(state_metrics)
 
-    expected_sources = section.get("expected_sources", [])
-    if isinstance(expected_sources, list) and expected_sources:
+    expected_sources = _expected_sources(section)
+    if expected_sources:
         discovered_sources = _by((ecosystem.get("discovery") or {}).get("sources", []), "id") if isinstance(ecosystem.get("discovery"), dict) else {}
-        missing_sources = [str(item) for item in expected_sources if str(item) not in discovered_sources or discovered_sources[str(item)].get("found") is not True]
-        findings.append(_finding(
-            "n12.sources.discovery",
-            "PASS" if not missing_sources else "WARN",
-            "integration",
-            "Expected source-only Koali repositories are discoverable."
-            if not missing_sources else "Some source-only Koali repositories are not discoverable.",
-            evidence={"expected": expected_sources, "missing": missing_sources},
-        ))
+        for policy in expected_sources:
+            source_id = str(policy.get("id"))
+            required = bool(policy.get("required", True))
+            source = discovered_sources.get(source_id)
+            if source is None or source.get("found") is not True:
+                findings.append(_finding(
+                    f"n12.source.{source_id}.discovery",
+                    "FAIL" if required else "PASS",
+                    "integration",
+                    f"Required Koali source '{source_id}' is not discoverable." if required else f"Optional reference source '{source_id}' is absent, which is accepted.",
+                    evidence={"required": required, "found": False},
+                ))
+                continue
+            reference_expected = policy.get("reference_only")
+            boundary_ok = True if reference_expected is None else source.get("referenceOnly") is bool(reference_expected)
+            qualification = source.get("qualification") if isinstance(source.get("qualification"), dict) else {}
+            expected_state = policy.get("qualification_state")
+            qualification_ok = True if not expected_state else str(qualification.get("state")) == str(expected_state)
+            ok = boundary_ok and qualification_ok
+            findings.append(_finding(
+                f"n12.source.{source_id}.policy",
+                "PASS" if ok else ("FAIL" if required else "WARN"),
+                "integration",
+                f"Koali source '{source_id}' satisfies its discovery/boundary/qualification policy." if ok else f"Koali source '{source_id}' diverges from its expected policy.",
+                evidence={"found": True, "referenceOnly": source.get("referenceOnly"), "expectedReferenceOnly": reference_expected, "qualificationState": qualification.get("state"), "expectedQualificationState": expected_state},
+            ))
 
     if section.get("live_http", True):
         timeout = float(section.get("probe_timeout_seconds", 3))
@@ -537,7 +588,7 @@ def collect_koali_system_findings(
 
         runtimes = ecosystem.get("runtimes", {}) if isinstance(ecosystem.get("runtimes"), dict) else {}
         for item in _expected_products(section):
-            product_id, _module_id, _shell_critical, allow_unready = _product_policy(item)
+            product_id, _module_id, _shell_critical, allow_unready, _presentation = _product_policy(item)
             runtime = runtimes.get(product_id) if isinstance(runtimes.get(product_id), dict) else {}
             probes = runtime.get("probes", []) if isinstance(runtime.get("probes"), list) else []
             required_probes = [probe for probe in probes if isinstance(probe, dict) and probe.get("required") is True and isinstance(probe.get("url"), str)]

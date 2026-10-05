@@ -125,16 +125,11 @@
       "campaign_policy": "release"
     }
   },
-  "default_campaign": "koali-system",
+  "default_campaign": "koali-final",
   "qualification": {
-    "default_scope": "koali_product_system",
+    "default_scope": "koali_final_delta",
     "final_profile": "sovereign-linux-node",
-    "deferred_subsystems": {
-      "konnaxion": "placeholder_until_integration",
-      "ariane": "deferred_until_koali_integration_test",
-      "orgo": "draft_not_admitted",
-      "semantik_architect": "deferred_not_admitted"
-    }
+    "deferred_subsystems": {}
   },
   "ui_modularity": {
     "enabled": false,
@@ -156,7 +151,9 @@
       "koali-system-debug": "native",
       "N12": "native",
       "store": "native",
-      "N13": "native"
+      "N13": "native",
+      "koali-final": "native",
+      "koali-final-debug": "native"
     },
     "wsl_distro": "Ubuntu-24.04",
     "wsl_target_root": "~/work/koa-linux"
@@ -172,49 +169,223 @@
     "live_http": true,
     "expected_network_state": "online",
     "launcher_markers": [
-      "RUN_KOALI.cmd",
+      "START_KOALI.cmd",
+      "CHECK_KOALI.cmd",
+      "STOP_KOALI.cmd",
       "KOALI.pyw"
     ],
     "expected_products": [
       {
-        "id": "konnaxion",
-        "module_id": "konnaxion",
-        "shell_critical": true,
-        "allow_unready": false
-      },
-      {
         "id": "orgo",
         "module_id": "orgo",
         "shell_critical": true,
-        "allow_unready": false
+        "allow_unready": false,
+        "presentation": true
+      },
+      {
+        "id": "orgo_worlds",
+        "module_id": "orgo_worlds",
+        "shell_critical": true,
+        "allow_unready": false,
+        "presentation": true
       },
       {
         "id": "semantik_architect",
         "module_id": "semantik_architect",
         "shell_critical": false,
-        "allow_unready": true
+        "allow_unready": false,
+        "presentation": false
       },
       {
         "id": "koa_mediatheque",
         "module_id": "koa_mediatheque",
         "shell_critical": true,
-        "allow_unready": false
+        "allow_unready": false,
+        "presentation": true
+      },
+      {
+        "id": "konfid",
+        "module_id": "konfid",
+        "shell_critical": false,
+        "allow_unready": false,
+        "presentation": false
+      },
+      {
+        "id": "kor",
+        "module_id": "kor",
+        "shell_critical": false,
+        "allow_unready": false,
+        "presentation": false
       }
     ],
     "expected_sources": [
-      "kristal_framework",
-      "koa_linux",
-      "koali_control_panel",
-      "koa_digital_ecosystem"
+      {
+        "id": "koa_mediatheque_blank_instance",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "koa_linux",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "koali_control_panel",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "koa_digital_ecosystem",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "interaction_kernel",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "semantik_runtime_orchestrator",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
+      {
+        "id": "kristal_framework",
+        "required": false,
+        "reference_only": true,
+        "qualification_state": "reference"
+      }
     ]
   },
   "campaign_targets": {
     "koali-system": "../koali-spaces",
     "koali-system-debug": "../koali-spaces",
-    "store": "../koa-linux"
+    "store": "../koa-linux",
+    "koali-final": "../koali-spaces",
+    "koali-final-debug": "../koali-spaces"
   },
   "store": {
     "root": "../koa-linux",
     "runtime_checks": false
+  },
+  "koali_final": {
+    "enabled": true,
+    "catalog": "config/ecosystem.catalog.json",
+    "bootstrap_script": "scripts/bootstrap-koali.ps1",
+    "bootstrap_status": ".koali-dev/bootstrap/bootstrap-status.json",
+    "launcher_markers": [
+      "START_KOALI.cmd",
+      "CHECK_KOALI.cmd",
+      "STOP_KOALI.cmd",
+      "KOALI.pyw"
+    ],
+    "required_products": {
+      "orgo": {
+        "affects_shell_state": true
+      },
+      "orgo_worlds": {
+        "affects_shell_state": true
+      },
+      "semantik_architect": {
+        "affects_shell_state": false
+      },
+      "koa_mediatheque": {
+        "affects_shell_state": true
+      },
+      "konfid": {
+        "affects_shell_state": false
+      },
+      "kor": {
+        "affects_shell_state": false
+      }
+    },
+    "required_sources": [
+      "koa_mediatheque_blank_instance",
+      "koa_linux",
+      "koali_control_panel",
+      "koa_digital_ecosystem",
+      "interaction_kernel",
+      "semantik_runtime_orchestrator"
+    ],
+    "owner_contracts": {
+      "orgo": {
+        "path": "Orgo/Orgo/koali.integration.json",
+        "surface": "web"
+      },
+      "orgo_worlds": {
+        "path": "Orgo/Orgo_Worlds/koali.integration.json",
+        "surface": "web"
+      },
+      "semantik_architect": {
+        "path": "SemantiK_Architect/SemantiK_Architect/koali.integration.json",
+        "surface": "headless"
+      },
+      "koa_mediatheque": {
+        "path": "kOA_Mediatheque/mediatheque/koali.integration.json",
+        "surface": "web"
+      },
+      "konfid": {
+        "path": "Konfid/konfid/koali.integration.json",
+        "surface": "headless"
+      },
+      "kor": {
+        "path": "Kor/kor/koali.integration.json",
+        "surface": "headless"
+      }
+    },
+    "bootstrap_contract_tokens": [
+      "uv.exe' @('python','install','3.12','3.13','3.14')",
+      "Ensure-PythonProject 'kor'",
+      "'3.14'",
+      "Ensure-PythonProject 'koa-mediatheque'",
+      "Ensure-NodeProject 'interaction-kernel-typescript'",
+      "Ensure-PythonProject 'interaction-kernel'",
+      "koa-mediatheque-instance",
+      "Docker is not required for Koali local start"
+    ],
+    "required_bootstrap_events": [
+      "node",
+      "pnpm",
+      "uv",
+      "python-runtimes",
+      "koali-spaces",
+      "orgo",
+      "orgo-worlds",
+      "interaction-kernel-typescript",
+      "semantik-architect",
+      "semantik-runtime-orchestrator",
+      "konfid",
+      "kor",
+      "interaction-kernel",
+      "koa-mediatheque",
+      "koa-linux",
+      "koa-mediatheque-instance",
+      "koali-control-panel",
+      "orgo-local-database"
+    ],
+    "mediatheque": {
+      "engine": "kOA_Mediatheque/mediatheque",
+      "instance": "kOA_Mediatheque/mediatheque-blank",
+      "config": "mediatheque.instance.toml",
+      "database": "01_DB/koa_mediatheque.sqlite"
+    },
+    "expected_reserved_ports": [
+      3100,
+      4100,
+      4173,
+      4302,
+      4303,
+      8301,
+      8304,
+      8305,
+      8501,
+      55432
+    ]
   }
 }

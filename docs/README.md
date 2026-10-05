@@ -10,3 +10,5 @@
 - `KOALI_SYSTEM_TESTS.md` — exact N12 live-system checks and KS4.4 readiness policy.
 
 - [N13 — Store and third-party applications](STORE_TESTS.md)
+
+- [N14 — Koali Final Integration Delta](KOALI_FINAL_DELTA.md)

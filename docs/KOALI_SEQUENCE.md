@@ -1,49 +1,15 @@
-# Koali sequence — LevelUpDiag 2.5
+# Koali sequence — LevelUpDiag 3.0
 
-## Primary path: live Koali product system
-
-Start Koali with its managed launcher, wait for the Shell to become available, then run:
+Default targeted sequence:
 
 ```text
-RUN_KOALI.cmd
-→ LevelUpDiag koali-system
-→ N00 Diagnostic Integrity
+N00 Diagnostic Integrity
 → N12 Koali Product System
-→ N13 Store and Third-Party Applications
+→ N14 Koali Final Integration Delta
 ```
 
-N12 consumes the runtime evidence produced by Koali itself:
+This is the `koali-final` campaign. It intentionally omits N01-N11 and N13 because those belong to legacy kOA validation, release, or Store scopes and would repeat evidence unrelated to the current Koali integration delta.
 
-```text
-.koali-dev/state/ecosystem-status.json
-.koali-dev/state/surface-runtime.json
-.koali-dev/state/active-state.json
-        ↓
-owner contracts + surface projection + module health
-        ↓
-/api/shell-state + independent loopback probes
-```
+N12 proves the live six-product composition. N14 proves the one-click/bootstrap/storage boundaries without mutating the workspace.
 
-The expected KS4.4 policy is:
-
-- Konnaxion, Orgo and Médiathèque kOA are Shell-critical and must be ready.
-- SemantiK Architect remains linked/projected but its current runtime outage is accepted and must not degrade the global Shell.
-- Kristal, kOA Linux, Koali Control Panel and kOA Digital Ecosystem remain source-only discoveries.
-- Koali must not expose repository paths, commands, PIDs or other orchestration-private fields through the public Shell state.
-- Hosted applications keep their own internal navigation; Koali must not recreate a redundant product sidebar.
-
-## Legacy path: kOA core stabilization
-
-The historical campaigns remain available unchanged for the underlying kOA-Linux target:
-
-```text
-stabilization
-stabilization-runtime
-audit-total
-validation
-release
-```
-
-These continue to use N01-N11 and the WSL/native toolchain rules documented by the kOA-Linux qualification flow.
-
-N13 checks koa-linux store sources by default; Linux session checks are opt-in. See [Store tests](STORE_TESTS.md).
+N13 Store remains independently available through the `store` campaign.

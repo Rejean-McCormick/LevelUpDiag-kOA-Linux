@@ -29,7 +29,7 @@ class StabilizationTests(unittest.TestCase):
 
     def test_environment_requires_native_core_build_toolchain(self):
         cfg = json.loads((ROOT / "levelupdiag.config.json").read_text(encoding="utf-8"))
-        self.assertEqual(cfg["default_campaign"], "koali-system")
+        self.assertEqual(cfg["default_campaign"], "koali-final")
         for tool in ("python", "uv", "git", "cargo", "rustc", "cc"):
             self.assertIn(tool, cfg["toolchain"]["required"])
 
@@ -45,9 +45,9 @@ class StabilizationTests(unittest.TestCase):
         )
 
 
-    def test_cli_defaults_to_koali_system(self):
+    def test_cli_defaults_to_koali_final(self):
         from levelupdiag_core.cli import parser
-        self.assertEqual(parser().parse_args(["run"]).selection, "koali-system")
+        self.assertEqual(parser().parse_args(["run"]).selection, "koali-final")
 
 
 if __name__ == "__main__":

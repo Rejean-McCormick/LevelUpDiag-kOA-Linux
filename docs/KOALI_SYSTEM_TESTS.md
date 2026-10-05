@@ -1,26 +1,24 @@
-# N12 — Koali Product System
+# N12 — Koali Product System (v3.0)
 
-N12 is a read-only live-system diagnostic for the KS4.x Koali composition layer.
+N12 validates the **live** final Koali composition. It does not rerun product unit/integration test suites.
 
-It verifies:
+Expected products:
 
-1. the Koali repository and managed launcher are present;
-2. `ecosystem-status.json`, `surface-runtime.json`, and `active-state.json` exist and are fresh;
-3. every expected application remains in its owner repository with a discoverable `koali.integration.json`;
-4. Konnaxion, Orgo, and Médiathèque are ready;
-5. SemantiK Architect may be unready while remaining linked and visible;
-6. every product has a runtime registration and resolved local embed target;
-7. owner application manifests expose routes but no redundant Koali sidebar;
-8. presentation authority remains presentation-only and does not grant capabilities or perform direct domain writes;
-9. the global Shell is `ready` and `online` when all Shell-critical products are ready;
-10. `/api/shell-state` matches the canonical active projection and does not expose orchestration-private fields;
-11. required runtime probes are independently rechecked over loopback only.
+- Orgo — web, shell-critical, required ready.
+- Orgo Worlds — web, shell-critical, required ready.
+- SemantiK Architect — headless, required ready, no fake UI projection.
+- Médiathèque kOA — web, shell-critical, required ready.
+- Konfid — headless, required ready, no fake UI projection.
+- Kor — headless, required ready, no fake UI projection.
 
-N12 refuses non-loopback HTTP targets. It does not turn `allow_network=false` into general network access.
+N12 checks canonical state freshness, owner-contract discovery, runtime readiness, web-surface registration only where appropriate, active Space projection, shell health semantics, public `/api/shell-state` privacy and independent loopback probes.
 
-## Changes in 2.6
+It also checks required source/runtime authorities and their qualification state. Kristal is optional and must remain reference-only if present.
 
-Optional runtime outages now report WARN, not PASS. Disabled HTTP checks and
-products without independently testable required HTTP probes report PARTIAL.
-Loopback restrictions apply to redirects too, and environment HTTP proxies are
-disabled for these probes. `koali-system` also runs N13; see [Store tests](STORE_TESTS.md).
+Run after Koali is started:
+
+```bat
+python levelupdiag.py run koali-system
+```
+
+For the full targeted final integration check, use `koali-final` (N00 + N12 + N14).

@@ -3,7 +3,7 @@
   "standard": "LevelUpDiag",
   "standard_version": "1.0.0",
   "suite_name": "LevelUpDiag-Koali",
-  "suite_version": "2.7.0",
+  "suite_version": "3.0.0",
   "repository_mode": "sibling-specialization",
   "control_dir_default": ".levelupdiag",
   "levels": [
@@ -209,13 +209,27 @@
       "timeout_seconds": 150,
       "parallel_safe": false,
       "purpose": "Check store sources, image projection and optional read-only probes inside the Linux desktop; never install applications."
+    },
+    {
+      "id": "N14",
+      "name": "Koali Final Integration Delta",
+      "module": "levels.n14_koali_final_delta",
+      "category": "integration",
+      "order": 140,
+      "required": true,
+      "depends_on": [
+        "N00"
+      ],
+      "timeout_seconds": 120,
+      "parallel_safe": false,
+      "purpose": "Validate only the finalized Koali integration delta: current six-product topology, headless/web boundaries, required source authorities, one-click bootstrap evidence, launcher policy, and persistent Mediatheque instance without replaying already-green component suites."
     }
   ],
   "campaigns": {
     "koali-system": {
       "mode": "validation",
       "scope": "koali_product_system",
-      "description": "Windows-native live Koali Shell and linked products. Store/Linux installation is qualified separately with store.",
+      "description": "Live Koali state/probes for the finalized six-product topology; no legacy component-suite replay.",
       "levels": [
         "N00",
         "N12"
@@ -224,7 +238,7 @@
     "koali-system-debug": {
       "mode": "debug",
       "scope": "koali_product_system",
-      "description": "Windows-native live Koali Shell and linked products. Store/Linux installation is qualified separately with store.",
+      "description": "Non-blocking live Koali state/probes for the finalized six-product topology.",
       "levels": [
         "N00",
         "N12"
@@ -526,6 +540,26 @@
         "N08",
         "N09",
         "N10"
+      ]
+    },
+    "koali-final": {
+      "mode": "validation",
+      "scope": "koali_final_delta",
+      "description": "Targeted final Koali qualification: live integrated system plus one-click/bootstrap/storage delta. Does not replay legacy kOA component suites.",
+      "levels": [
+        "N00",
+        "N12",
+        "N14"
+      ]
+    },
+    "koali-final-debug": {
+      "mode": "debug",
+      "scope": "koali_final_delta",
+      "description": "Non-blocking form of the targeted final Koali integration qualification.",
+      "levels": [
+        "N00",
+        "N12",
+        "N14"
       ]
     }
   },

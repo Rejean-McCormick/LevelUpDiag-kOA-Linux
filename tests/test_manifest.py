@@ -11,7 +11,7 @@ class ManifestTests(unittest.TestCase):
     def test_sequence_is_stable_and_serial(self):
         m = load_manifest(ROOT)
         levels = sorted(m["levels"], key=lambda x:(x.get("order",0),x["id"]))
-        self.assertEqual([x["id"] for x in levels], [f"N{i:02d}" for i in range(14)])
+        self.assertEqual([x["id"] for x in levels], [f"N{i:02d}" for i in range(15)])
         self.assertTrue(all(x.get("parallel_safe") is False for x in levels))
 
     def test_debug_excludes_formalities(self):
@@ -45,13 +45,20 @@ class ManifestTests(unittest.TestCase):
     def test_required_functional_levels(self):
         m = load_manifest(ROOT)
         required = [x["id"] for x in m["levels"] if x.get("required")]
-        self.assertEqual(required, ["N00","N01","N04","N05","N12","N13"])
+        self.assertEqual(required, ["N00","N01","N04","N05","N12","N13","N14"])
 
     def test_koali_system_campaign_is_live_system_only(self):
         m = load_manifest(ROOT)
         self.assertEqual([x["id"] for x in resolve_selection(m, "koali-system")], ["N00", "N12"])
         self.assertEqual(m["campaigns"]["koali-system"]["mode"], "validation")
         self.assertEqual(m["campaigns"]["koali-system"]["scope"], "koali_product_system")
+
+
+    def test_koali_final_campaign_is_targeted_delta(self):
+        m = load_manifest(ROOT)
+        self.assertEqual([x["id"] for x in resolve_selection(m, "koali-final")], ["N00", "N12", "N14"])
+        self.assertEqual(m["campaigns"]["koali-final"]["mode"], "validation")
+        self.assertEqual(m["campaigns"]["koali-final"]["scope"], "koali_final_delta")
 
     def test_store_is_independent_of_shell_and_core_build(self):
         m = load_manifest(ROOT)

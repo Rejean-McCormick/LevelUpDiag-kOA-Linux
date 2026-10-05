@@ -22,7 +22,7 @@ TOOL_ROOT = Path(__file__).resolve().parent
 class LevelUpDiagConsole(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("LevelUpDiag-Koali 2.7.0 — Koali Product System")
+        self.title("LevelUpDiag-Koali 3.0.0 — Koali Final Integration")
         self.minsize(900, 720)
         self.geometry("1040x820")
 
@@ -45,7 +45,7 @@ class LevelUpDiagConsole(tk.Tk):
         header = ttk.Frame(outer)
         header.pack(fill="x")
         ttk.Label(header, text="LevelUpDiag-Koali", font=("Segoe UI", 14, "bold")).pack(side="left")
-        self.status_var = tk.StringVar(value="Prêt — KOALI SYSTEM")
+        self.status_var = tk.StringVar(value="Prêt — KOALI FINAL")
         right_header = ttk.Frame(header)
         right_header.pack(side="right")
         ttk.Label(right_header, textvariable=self.status_var).pack(anchor="e")
@@ -54,9 +54,9 @@ class LevelUpDiagConsole(tk.Tk):
         ttk.Label(
             outer,
             text=(
-                "KOALI SYSTEM vérifie le système produit réellement lancé: projection du Shell, owner contracts liés, "
-                "Konnaxion, Orgo et Médiathèque critiques, et isolation correcte des modules optionnels. "
-                "SemantiK Architect reste visible mais son indisponibilité runtime actuelle est explicitement acceptée."
+                "KOALI FINAL cible uniquement les risques d'intégration encore utiles: six produits requis, séparation web/headless, "
+                "sources qualifiées, bootstrap Windows réellement complété, launchers, ports et persistance Médiathèque. "
+                "Les suites internes déjà vertes des produits ne sont pas rejouées."
             ),
             wraplength=980,
         ).pack(anchor="w", pady=(4, 10))
@@ -72,9 +72,9 @@ class LevelUpDiagConsole(tk.Tk):
 
         presets = ttk.Frame(outer)
         presets.pack(fill="x", pady=(0, 8))
-        ttk.Button(presets, text="KOALI SYSTEM", command=lambda: self._select_campaign("koali-system", "validation")).pack(side="left", padx=(0, 5))
+        ttk.Button(presets, text="KOALI FINAL", command=lambda: self._select_campaign("koali-final", "validation")).pack(side="left", padx=(0, 5))
         ttk.Button(presets, text="STORE", command=lambda: self._select_campaign("store", "validation")).pack(side="left", padx=5)
-        ttk.Button(presets, text="KOALI DEBUG", command=lambda: self._select_campaign("koali-system-debug", "debug")).pack(side="left", padx=5)
+        ttk.Button(presets, text="KOALI FINAL DEBUG", command=lambda: self._select_campaign("koali-final-debug", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="STABILISATION kOA", command=lambda: self._select_campaign("stabilization", "debug")).pack(side="left", padx=5)
         ttk.Button(presets, text="AUDIT TOTAL", command=lambda: self._select_campaign("audit-total", "debug")).pack(side="left", padx=5)
         runtime_presets = ttk.Frame(outer)
@@ -135,7 +135,7 @@ class LevelUpDiagConsole(tk.Tk):
 
         self.level_frame.columnconfigure(0, weight=1)
         self.level_frame.columnconfigure(1, weight=1)
-        self._select_campaign("koali-system", "validation")
+        self._select_campaign("koali-final", "validation")
         self._refresh_latest_log_path()
 
     def _select_campaign(self, campaign: str, mode: str) -> None:
@@ -159,9 +159,9 @@ class LevelUpDiagConsole(tk.Tk):
     def _mode_changed(self) -> None:
         mode = self.mode_var.get()
         if mode == "debug":
-            text = "DEBUG: les anomalies restent visibles sans bloquer toute la campagne. KOALI DEBUG utilise le backend Windows natif pour observer le Shell réellement lancé."
+            text = "DEBUG: mêmes vérifications ciblées d’intégration, mais l’agrégation reste non bloquante."
         elif mode == "validation":
-            text = "VALIDATION: KOALI SYSTEM exige que le Shell et les produits critiques soient prêts; SemantiK peut rester indisponible car il est explicitement optionnel."
+            text = "VALIDATION: les six produits requis doivent être prêts; les services headless doivent rester hors de la projection UI et les sources requises doivent être qualifiées."
         else:
             text = "RELEASE: politique stricte avec protection de l'état Git suivi et dépendances bloquantes."
         self.policy_var.set(text)
@@ -178,7 +178,7 @@ class LevelUpDiagConsole(tk.Tk):
 
     def _campaign_for_selected(self, selected: list[str], mode: str) -> str | None:
         wanted = set(selected)
-        preferred = (getattr(self, "selected_campaign", ""), "audit-local", "audit-qemu", "koali-system", "koali-system-debug", "store", "stabilization", "stabilization-runtime", "debug", "audit-total", "structure", "validation", "release")
+        preferred = (getattr(self, "selected_campaign", ""), "koali-final", "koali-final-debug", "audit-local", "audit-qemu", "koali-system", "koali-system-debug", "store", "stabilization", "stabilization-runtime", "debug", "audit-total", "structure", "validation", "release")
         campaigns = self.manifest.get("campaigns", {})
         for name in preferred:
             meta = campaigns.get(name, {})
