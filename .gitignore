@@ -39,3 +39,11 @@ Desktop.ini
 # Local helper copies
 /GitSink.bat
 /SmartSnap.pyw
+
+# Additional local patterns
+.env
+.env.*
+!.env.example
+!*.example
+*.bak-*
+*.backup_*
