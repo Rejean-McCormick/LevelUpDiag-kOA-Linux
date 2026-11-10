@@ -1,5 +1,7 @@
 # LevelUpDiag-Koali v3.0
 
+> **Branch 08 target-system alignment:** see [docs/BRANCH08_OBSERVED_READINESS.md](docs/BRANCH08_OBSERVED_READINESS.md) for verified local interoperability tests, explicit authority boundaries, and unresolved deployment gates. This note does not confer release or host permissions.
+
 LevelUpDiag-Koali 3.0 targets the **final Koali integration**, without replaying component test suites that are already known green.
 
 The default campaign is now:

@@ -150,6 +150,17 @@ class KoaliSystemTests(unittest.TestCase):
         self.assertEqual(orgo["verdict"], "FAIL")
         self.assertEqual(shell["verdict"], "FAIL")
 
+    def test_required_module_missing_health_is_not_qualified_even_when_shell_claims_ready(self):
+        tmp, cfg, koali, ecosystem, surface, active = self._fixture()
+        self.addCleanup(tmp.cleanup)
+        active["module_health"] = [item for item in active["module_health"] if item["module_id"] != "orgo"]
+        findings, _ = evaluate_loaded_state(
+            cfg, koali_root=koali, ecosystem=ecosystem, surface=surface, active=active,
+            now=datetime(2026, 10, 5, 20, 0, 5, tzinfo=timezone.utc),
+        )
+        item = next(f for f in findings if f["id"] == "n12.product.orgo.module_health")
+        self.assertEqual(item["verdict"], "FAIL")
+
     def test_public_shell_state_rejects_orchestration_private_fields(self):
         findings = _public_shell_privacy_findings({
             "state": "ready",
