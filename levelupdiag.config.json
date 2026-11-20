@@ -162,7 +162,7 @@
     "enabled": true,
     "root": "../koali-spaces",
     "state_dir": ".koali-dev/state",
-    "shell_url": "http://127.0.0.1:4173",
+    "shell_url": "http://127.0.0.1:21170",
     "shell_state_endpoint": "/api/shell-state",
     "max_state_age_seconds": 30,
     "probe_timeout_seconds": 3,
@@ -376,16 +376,16 @@
       "database": "01_DB/koa_mediatheque.sqlite"
     },
     "expected_reserved_ports": [
-      3100,
-      4100,
-      4173,
-      4302,
-      4303,
+      21112,
+      21113,
+      21170,
+      21114,
+      21115,
       8301,
       8304,
       8305,
       8501,
-      55432
+      21116
     ]
   }
 }
