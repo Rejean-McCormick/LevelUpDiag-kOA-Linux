@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import sqlite3
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -210,7 +211,7 @@ def _mediatheque_findings(mycode: Path, section: dict) -> list[dict]:
         findings.append(_finding("n14.mediatheque.database", "BLOCKED", "storage", "Persistent Médiathèque SQLite database has not been initialized.", path=str(db), recommendation="Run START_KOALI.cmd once to initialize the sibling instance."))
         return findings
     try:
-        with sqlite3.connect(str(db)) as conn:
+        with closing(sqlite3.connect(str(db))) as conn:
             row = conn.execute("select value from schema_meta where key='schema_version'").fetchone()
         version = str(row[0]) if row else ""
         ok = bool(version)

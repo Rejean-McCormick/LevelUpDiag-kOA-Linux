@@ -4,6 +4,8 @@ import json
 import sqlite3
 import tempfile
 import unittest
+from contextlib import closing
+from unittest.mock import patch
 from pathlib import Path
 
 from levels.koali_final_support import collect_koali_final_findings
@@ -55,7 +57,7 @@ class KoaliFinalDeltaTests(unittest.TestCase):
         (instance / "01_DB").mkdir(parents=True)
         (instance / "mediatheque.instance.toml").write_text("[instance]\nname='blank'\n", encoding="utf-8")
         db = instance / "01_DB" / "koa_mediatheque.sqlite"
-        with sqlite3.connect(db) as conn:
+        with closing(sqlite3.connect(db)) as conn, conn:
             conn.execute("create table schema_meta (key text primary key, value text not null)")
             conn.execute("insert into schema_meta(key,value) values ('schema_version','4')")
 
@@ -70,7 +72,9 @@ class KoaliFinalDeltaTests(unittest.TestCase):
     def test_complete_final_delta_fixture_has_no_failures(self):
         tmp, cfg = self._fixture()
         self.addCleanup(tmp.cleanup)
-        findings, _ = collect_koali_final_findings(cfg)
+        # This fixture validates the synthetic installation, independent of host tools.
+        with patch("levels.koali_final_support.shutil.which", return_value="fixture-tool"):
+            findings, _ = collect_koali_final_findings(cfg)
         bad = [item for item in findings if item["verdict"] in {"FAIL", "BLOCKED", "ERROR", "INFRA_ERROR", "CONFIG_ERROR"}]
         self.assertEqual(bad, [])
 
