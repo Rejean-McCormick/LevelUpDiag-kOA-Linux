@@ -11,7 +11,7 @@ koali-final = N00 + N12 + N14
 ```
 
 - **N00 Diagnostic Integrity** verifies that the diagnostic frame itself is trustworthy.
-- **N12 Koali Product System** validates the live Koali state, six required owner products, loopback probes, source qualification, public shell projection, and web/headless boundaries.
+- **N12 Koali Product System** validates the live Koali state, seven required owner products, loopback probes, source qualification, public shell projection, and web/headless boundaries.
 - **N14 Koali Final Integration Delta** validates the remaining one-click integration risks: final catalog topology, owner contracts, bootstrap evidence, launcher contract, reserved service ports, Kristal reference-only policy, no Diag onboarding, and Médiathèque engine/instance persistence.
 
 It intentionally does **not** run the legacy kOA component/security/offline/system suites unless you explicitly select those campaigns.
@@ -19,8 +19,9 @@ It intentionally does **not** run the legacy kOA component/security/offline/syst
 ## Final product policy
 
 ```text
+Konnaxion           required / web / shell-critical
 Orgo                required / web / shell-critical
-Orgo Worlds         required / web / shell-critical
+Orgo Worlds         required / headless / shell-critical Orgo context
 SemantiK Architect  required / headless / not projected as UI
 Médiathèque kOA     required / web / shell-critical
 Konfid               required / headless / not projected as UI
@@ -30,6 +31,7 @@ Kor                  required / headless / not projected as UI
 Required source/runtime authorities:
 
 ```text
+Konnaxion Worlds Engine
 Médiathèque blank instance
 kOA Linux
 Koali Control Panel
@@ -66,10 +68,10 @@ The desktop console `LEVELUPDIAG_CONSOLE.pyw` defaults to **KOALI FINAL**.
 
 N12 reads Koali's canonical `.koali-dev/state` projection and independently probes required loopback endpoints. It verifies:
 
-- all six products are discovered with valid owner contracts;
-- all six required runtimes are `ready`;
-- Orgo, Orgo Worlds, and Médiathèque are projected as owner-controlled web surfaces;
-- SemantiK Architect, Konfid, and Kor remain headless and are **not** projected as fake UI modules;
+- all seven products are discovered with valid owner contracts;
+- all seven required runtimes are `ready`;
+- Konnaxion, Orgo, and Médiathèque are projected as owner-controlled web surfaces;
+- Orgo Worlds, SemantiK Architect, Konfid, and Kor remain headless and are **not** projected as fake UI modules;
 - the public `/api/shell-state` matches the canonical projection without leaking orchestration-private fields;
 - required source/runtime authorities are found and qualified;
 - an optional Kristal repository, if present, remains reference-only.
@@ -133,4 +135,4 @@ Reports remain under the selected target repository in `.levelupdiag/`. The fina
 
 ## Version 3.0
 
-Version 3.0 aligns LevelUpDiag with the finalized Koali topology after the cumulative integration work. It removes Konnaxion/Ariane from the active Koali-system expectation, makes all six supplied products required, understands headless owner products correctly, qualifies required source/runtime authorities, and adds N14 so the remaining Windows/bootstrap/storage risks can be checked without rerunning already-green product suites.
+Version 3.0 aligns LevelUpDiag with the finalized Koali topology after the cumulative integration work. The current catalog requires seven products, including Konnaxion, and treats Orgo Worlds as a headless context service. It qualifies required source/runtime authorities and includes N14 so the remaining Windows/bootstrap/storage risks can be checked without rerunning already-green product suites.

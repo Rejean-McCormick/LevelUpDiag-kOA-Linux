@@ -200,6 +200,11 @@ def run_campaign(tool_root: Path, selection: str, target_override=None, jobs=Non
         pool.shutdown(wait=True)
 
     ordered = [results[m["id"]] for m in levels]
+    for result in ordered:
+        # Blocked levels have no worker to write their result.
+        path = run_root / "levels" / result["level_id"] / "result.json"
+        if not path.is_file():
+            write_json(path, result)
     required_map = {m["id"]:bool(m.get("required",False)) for m in levels}
     verdict = campaign_verdict(ordered, required_map, effective_mode)
 

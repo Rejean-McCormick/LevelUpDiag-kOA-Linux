@@ -176,6 +176,13 @@
     ],
     "expected_products": [
       {
+        "id": "konnaxion",
+        "module_id": "konnaxion",
+        "shell_critical": true,
+        "allow_unready": false,
+        "presentation": true
+      },
+      {
         "id": "orgo",
         "module_id": "orgo",
         "shell_critical": true,
@@ -187,7 +194,7 @@
         "module_id": "orgo_worlds",
         "shell_critical": true,
         "allow_unready": false,
-        "presentation": true
+        "presentation": false
       },
       {
         "id": "semantik_architect",
@@ -219,6 +226,12 @@
       }
     ],
     "expected_sources": [
+      {
+        "id": "konnaxion_worlds",
+        "required": true,
+        "reference_only": false,
+        "qualification_state": "ready"
+      },
       {
         "id": "koa_mediatheque_blank_instance",
         "required": true,
@@ -286,6 +299,9 @@
       "KOALI.pyw"
     ],
     "required_products": {
+      "konnaxion": {
+        "affects_shell_state": true
+      },
       "orgo": {
         "affects_shell_state": true
       },
@@ -306,6 +322,7 @@
       }
     },
     "required_sources": [
+      "konnaxion_worlds",
       "koa_mediatheque_blank_instance",
       "koa_linux",
       "koali_control_panel",
@@ -314,13 +331,17 @@
       "semantik_runtime_orchestrator"
     ],
     "owner_contracts": {
+      "konnaxion": {
+        "path": "Konnaxion/Konnaxion/koali.integration.json",
+        "surface": "web"
+      },
       "orgo": {
         "path": "Orgo/Orgo/koali.integration.json",
         "surface": "web"
       },
       "orgo_worlds": {
         "path": "Orgo/Orgo_Worlds/koali.integration.json",
-        "surface": "web"
+        "surface": "headless"
       },
       "semantik_architect": {
         "path": "SemantiK_Architect/SemantiK_Architect/koali.integration.json",
@@ -355,6 +376,10 @@
       "uv",
       "python-runtimes",
       "koali-spaces",
+      "konnaxion-frontend",
+      "konnaxion-backend",
+      "konnaxion-worlds",
+      "konnaxion-universe",
       "orgo",
       "orgo-worlds",
       "interaction-kernel-typescript",
@@ -376,12 +401,14 @@
       "database": "01_DB/koa_mediatheque.sqlite"
     },
     "expected_reserved_ports": [
-      21112,
       21113,
       21170,
+      21134,
       21114,
       21115,
+      4304,
       8301,
+      21135,
       8304,
       8305,
       8501,

@@ -5,7 +5,7 @@ from pathlib import Path
 from levelupdiag_core.manifest import load_manifest
 from levelupdiag_core.modes import VALID_MODES
 
-EXPECTED = [f"N{i:02d}" for i in range(14)]
+EXPECTED = [f"N{i:02d}" for i in range(15)]
 REQUIRED_COMMANDS = {"docs", "contracts", "components", "integrations", "security", "offline", "system"}
 
 
@@ -17,7 +17,7 @@ def run(cfg, report):
     manifest = load_manifest(tool)
     ordered = [x["id"] for x in sorted(manifest["levels"], key=lambda x:(x.get("order",0),x["id"]))]
     report.add("koali.sequence.manifest", "PASS" if ordered == EXPECTED else "CONFIG_ERROR", "diagnostics",
-               "Koali diagnostic sequence is intact." if ordered == EXPECTED else "Koali diagnostic sequence differs from the expected N00-N13 order.", evidence=ordered)
+               "Koali diagnostic sequence is intact." if ordered == EXPECTED else "Koali diagnostic sequence differs from the expected N00-N14 order.", evidence=ordered)
     parallel = [x["id"] for x in manifest["levels"] if x.get("parallel_safe", True)]
     report.add("koali.sequence.serial", "PASS" if not parallel else "CONFIG_ERROR", "diagnostics",
                "All Koali levels are forced to serial execution." if not parallel else "One or more Koali levels permit parallel execution.", evidence=parallel or {"serial":True})
